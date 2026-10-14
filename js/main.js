@@ -15,6 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // الرندرة الديناميكية الشاملة لكافة البيانات
   renderAllDynamicComponents();
 
+  // المزامنة السحابية التلقائية مع data.json إن وجد تحديث أحدث على السيرفر
+  if (typeof syncWithRemoteDataJSON === "function") {
+    syncWithRemoteDataJSON().then(updated => {
+      if (updated) renderAllDynamicComponents();
+    });
+  }
+
   // تفعيل محرك المزامنة اللحظية بين التبويبات المفتوحة
   initLiveSyncListeners();
 });
@@ -58,7 +65,7 @@ function renderAllDynamicComponents() {
 // ==========================================
 // 2. THEME SWITCHER (Dark / Light)
 // ==========================================
-let currentTheme = localStorage.getItem("rose1_theme") || "dark";
+let currentTheme = (typeof safeGetLocal === "function" ? safeGetLocal("rose1_theme") : null) || "dark";
 
 function initTheme() {
   const html = document.documentElement;
@@ -68,7 +75,7 @@ function initTheme() {
 
 function toggleTheme() {
   currentTheme = currentTheme === "dark" ? "light" : "dark";
-  localStorage.setItem("rose1_theme", currentTheme);
+  if (typeof safeSetLocal === "function") safeSetLocal("rose1_theme", currentTheme);
   document.documentElement.setAttribute("data-theme", currentTheme);
   updateThemeUI();
 }
@@ -92,7 +99,7 @@ function updateThemeUI() {
 // ==========================================
 // 3. BILINGUAL SWITCHER (Arabic / English)
 // ==========================================
-let currentLang = localStorage.getItem("rose1_lang") || "ar";
+let currentLang = (typeof safeGetLocal === "function" ? safeGetLocal("rose1_lang") : null) || "ar";
 
 function initLanguage() {
   document.documentElement.lang = currentLang;
@@ -102,7 +109,7 @@ function initLanguage() {
 
 function toggleLanguage() {
   currentLang = currentLang === "ar" ? "en" : "ar";
-  localStorage.setItem("rose1_lang", currentLang);
+  if (typeof safeSetLocal === "function") safeSetLocal("rose1_lang", currentLang);
   document.documentElement.lang = currentLang;
   document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
   applyTranslations();
@@ -214,6 +221,17 @@ function applyDynamicHotelData() {
   document.querySelectorAll("[data-bind='roomsCount']").forEach(el => {
     el.textContent = cfg.roomsCount;
   });
+  document.querySelectorAll("[data-bind='address']").forEach(el => {
+    el.textContent = currentLang === "en" ? (cfg.addressEn || cfg.addressAr) : cfg.addressAr;
+  });
+  if (cfg.extensions && cfg.extensions.length >= 2) {
+    document.querySelectorAll("[data-bind='ext701']").forEach(el => {
+      el.textContent = cfg.extensions[0].number;
+    });
+    document.querySelectorAll("[data-bind='ext444']").forEach(el => {
+      el.textContent = cfg.extensions[1].number;
+    });
+  }
 }
 
 function renderDynamicExtensions() {
@@ -253,9 +271,11 @@ function renderDynamicRooms() {
 
       const title = currentLang === "en" ? (r.nameEn || r.nameAr) : r.nameAr;
       const isNumericPrice = r.priceYER && r.priceYER > 0 && !r.priceCustom;
+      const customAr = r.priceTextAr || "حسب الطلب / أسعار خاصة";
+      const customEn = r.priceTextEn || "Upon Request / Special Rates";
       const priceMainText = isNumericPrice 
         ? `${r.priceYER.toLocaleString()} ر.ي`
-        : (currentLang === "en" ? "Upon Request / Special Rates" : "حسب الطلب / أسعار خاصة");
+        : (currentLang === "en" ? customEn : customAr);
       const priceSubText = isNumericPrice
         ? `(${r.priceSAR} ر.س / ليلة)`
         : (currentLang === "en" ? "Special Direct Rate" : "تواصل للحصول على أفضل سعر خاص");
@@ -415,14 +435,17 @@ function applyDesignCustomizations() {
 // ==========================================
 // 9. MOBILE NAVIGATION TOGGLE
 // ==========================================
-function initMobileNav() {
-  const toggleBtn = document.querySelector(".mobile-nav-toggle");
+function toggleMobileNav() {
   const navLinks = document.querySelector(".nav-links");
-  if (toggleBtn && navLinks) {
-    toggleBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("mobile-active");
-    });
+  const toggleBtn = document.querySelector(".mobile-nav-toggle");
+  if (navLinks) {
+    const isActive = navLinks.classList.toggle("mobile-active");
+    if (toggleBtn) toggleBtn.textContent = isActive ? "✕" : "☰";
   }
+}
+
+function initMobileNav() {
+  // Handled via onclick="toggleMobileNav()"
 }
 
 // ==========================================

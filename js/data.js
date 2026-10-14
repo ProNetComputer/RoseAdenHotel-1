@@ -1,20 +1,58 @@
+
+// مخزن احتياطي في الذاكرة في حال فتح الملفات محلياً (file://) مع حظر المتصفح لـ localStorage
+window._roseMemoryStore = window._roseMemoryStore || {};
+
+function safeGetLocal(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    return window._roseMemoryStore[key] || null;
+  }
+}
+
+function safeSetLocal(key, val) {
+  window._roseMemoryStore[key] = String(val);
+  try {
+    localStorage.setItem(key, String(val));
+  } catch (e) {}
+}
+
+function safeGetSession(key) {
+  try {
+    return sessionStorage.getItem(key);
+  } catch (e) {
+    return window._roseMemoryStore['sess_' + key] || null;
+  }
+}
+
+function safeSetSession(key, val) {
+  if (val === null) {
+    delete window._roseMemoryStore['sess_' + key];
+    try { sessionStorage.removeItem(key); } catch (e) {}
+    return;
+  }
+  window._roseMemoryStore['sess_' + key] = String(val);
+  try {
+    sessionStorage.setItem(key, String(val));
+  } catch (e) {}
+}
+
 /**
  * فندق روز عدن السياحي - الفرع الأول (ساحل أبين)
- * قاعدة البيانات المركزية المتطورة ومحرك المزامنة اللحظية (Centralized Data & Live Sync v3)
- * يدعم: المزامنة السحابية عبر data.json، البث اللحظي عبر BroadcastChannel، والتخزين المحلي
+ * قاعدة البيانات المركزية المتطورة ومحرك المزامنة والحفظ الاحترافي (Centralized Data & Save Engine v4)
+ * يدعم: المزامنة مع data.json، البث اللحظي عبر BroadcastChannel، وتوليد ملفات الحفظ (JSON / data.js / CSV)
  */
 
 const STORAGE_KEY = 'rose_aden_1_data';
 const SYNC_CHANNEL_NAME = 'rose1_hotel_live_sync';
 
-// قناة المزامنة اللحظية بين جميع التبويبات المفتوحة
 let syncChannel = null;
 try {
   if (typeof BroadcastChannel !== 'undefined') {
     syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
   }
 } catch (e) {
-  console.warn("BroadcastChannel not supported in this browser:", e);
+  console.warn("BroadcastChannel not supported:", e);
 }
 
 // 1. الإعدادات العامة لهوية الفندق
@@ -181,7 +219,7 @@ const inputCatalogs = {
   ]
 };
 
-// 5. الغرف الافتراضية
+// 5. الغرف الافتراضية (السعر الافتراضي: حسب الطلب / أسعار خاصة)
 const defaultRooms = [
   {
     id: 1,
@@ -397,10 +435,11 @@ const defaultGallery = [
 // دالة جلب البيانات مع الفحص والدمج الذكي
 function getHotelData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeGetLocal(STORAGE_KEY);
     if (!raw) {
       const initial = {
-        version: Date.now(),
+        version: 4,
+        lastUpdated: new Date().toISOString(),
         config: defaultHotelConfig,
         adminUsers: defaultAdminUsers,
         design: defaultDesignSettings,
@@ -409,7 +448,7 @@ function getHotelData() {
         reviews: defaultReviews,
         gallery: defaultGallery
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      safeSetLocal(STORAGE_KEY, JSON.stringify(initial));
       return initial;
     }
     const data = JSON.parse(raw);
@@ -427,26 +466,23 @@ function getHotelData() {
       data.rooms = defaultRooms;
       updated = true;
     } else {
-      // تحديث الأسعار لتكون افتراضياً: حسب الطلب / أسعار خاصة لجميع الغرف
       data.rooms.forEach(r => {
-        if (!r.priceTextAr || r.priceYER > 0) {
+        if (!r.priceTextAr) {
           r.priceTextAr = "حسب الطلب / أسعار خاصة";
           r.priceTextEn = "Upon Request / Special Rates";
           r.priceCustom = true;
-          r.priceYER = 0;
-          r.priceSAR = 0;
           updated = true;
         }
       });
     }
     if (updated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      safeSetLocal(STORAGE_KEY, JSON.stringify(data));
     }
     return data;
   } catch (e) {
     console.error("Error reading localStorage, using defaults:", e);
     return {
-      version: Date.now(),
+      version: 4,
       config: defaultHotelConfig,
       adminUsers: defaultAdminUsers,
       design: defaultDesignSettings,
@@ -458,13 +494,45 @@ function getHotelData() {
   }
 }
 
+// المزامنة السحابية التلقائية مع ملف data.json عند فتح الموقع على استضافة ويب (مثل GitHub Pages)
+async function syncWithRemoteDataJSON() {
+  if (window.location.protocol === 'file:') return false;
+  try {
+    const res = await fetch(`./data.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return false;
+    const remoteData = await res.json();
+    if (!remoteData || !remoteData.config || !remoteData.rooms) return false;
+
+    const localRaw = safeGetLocal(STORAGE_KEY);
+    if (!localRaw) {
+      safeSetLocal(STORAGE_KEY, JSON.stringify(remoteData));
+      return true;
+    }
+    const localData = JSON.parse(localRaw);
+    const remoteVer = Number(remoteData.version || 0);
+    const localVer = Number(localData.version || 0);
+
+    // إذا كان ملف data.json المنشور على السيرفر أحدث من النسخة المحلية، نحدّث البيانات تلقائياً
+    if (remoteVer > localVer) {
+      safeSetLocal(STORAGE_KEY, JSON.stringify(remoteData));
+      if (syncChannel) {
+        syncChannel.postMessage({ type: 'HOTEL_DATA_UPDATED', timestamp: remoteVer });
+      }
+      return true;
+    }
+  } catch (err) {
+    // يعمل الموقع بكفاءة من الذاكرة المحلية في حال عدم توفر اتصال
+  }
+  return false;
+}
+
 // دالة الحفظ مع البث اللحظي لجميع التبويبات المفتوحة
 function saveHotelData(data) {
   try {
     data.version = Date.now();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    data.lastUpdated = new Date().toISOString();
+    safeSetLocal(STORAGE_KEY, JSON.stringify(data));
 
-    // إشعار سائر التبويبات المفتوحة عبر BroadcastChannel
     if (syncChannel) {
       syncChannel.postMessage({
         type: 'HOTEL_DATA_UPDATED',
@@ -481,6 +549,7 @@ function saveHotelData(data) {
 function resetHotelData() {
   const initial = {
     version: Date.now(),
+    lastUpdated: new Date().toISOString(),
     config: defaultHotelConfig,
     adminUsers: defaultAdminUsers,
     design: defaultDesignSettings,
@@ -489,7 +558,7 @@ function resetHotelData() {
     reviews: defaultReviews,
     gallery: defaultGallery
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+  safeSetLocal(STORAGE_KEY, JSON.stringify(initial));
 
   if (syncChannel) {
     syncChannel.postMessage({
@@ -500,14 +569,87 @@ function resetHotelData() {
   return initial;
 }
 
-// دالة تصدير النسخة الاحتياطية JSON
+// 1. تصدير ملف قاعدة البيانات السحابية data.json
 function exportDataAsJSON() {
   const data = getHotelData();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = `data.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 2. تصدير ملف البرمجة المدمج data.js محدثاً بكافة التعديلات (للعمل بدون إنترنت أو استبدال js/data.js)
+function exportDataAsJSFile() {
+  const d = getHotelData();
+  const jsContent = `/**
+ * فندق روز عدن السياحي - الفرع الأول (ساحل أبين)
+ * ملف قاعدة البيانات المحدث والمولد آلياً من لوحة التحكم (${new Date().toLocaleString("ar-YE")})
+ */
+
+const STORAGE_KEY = 'rose_aden_1_data';
+const SYNC_CHANNEL_NAME = 'rose1_hotel_live_sync';
+
+let syncChannel = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+  }
+} catch (e) {}
+
+const defaultHotelConfig = ${JSON.stringify(d.config, null, 2)};
+const defaultAdminUsers = ${JSON.stringify(d.adminUsers, null, 2)};
+const defaultDesignSettings = ${JSON.stringify(d.design, null, 2)};
+const inputCatalogs = ${JSON.stringify(inputCatalogs, null, 2)};
+const defaultRooms = ${JSON.stringify(d.rooms, null, 2)};
+const defaultBookings = ${JSON.stringify(d.bookings, null, 2)};
+const defaultReviews = ${JSON.stringify(d.reviews, null, 2)};
+const defaultGallery = ${JSON.stringify(d.gallery, null, 2)};
+
+window._roseMemoryStore = window._roseMemoryStore || {};
+${safeGetLocal.toString()}
+${safeSetLocal.toString()}
+${safeGetSession.toString()}
+${safeSetSession.toString()}
+${getHotelData.toString()}
+${syncWithRemoteDataJSON.toString()}
+${saveHotelData.toString()}
+${resetHotelData.toString()}
+${exportDataAsJSON.toString()}
+${exportDataAsJSFile.toString()}
+${exportBookingsAsCSV.toString()}
+`;
+  const blob = new Blob([jsContent], { type: "application/javascript;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `data.js`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 3. تصدير سجل الحجوزات بصيغة Excel / CSV
+function exportBookingsAsCSV() {
+  const data = getHotelData();
+  const bookings = data.bookings || [];
+  const headers = ["رقم الحجز", "اسم الضيف", "رقم الهاتف", "الغرفة / الجناح", "تاريخ الدخول", "تاريخ المغادرة", "عدد النزلاء", "الحالة", "ملاحظات", "تاريخ الإنشاء"];
+  const rows = bookings.map(b => [
+    b.id, b.guestName, b.phone, b.roomTitle, b.checkIn, b.checkOut, b.guests, b.status, b.notes || "", b.dateCreated || ""
+  ]);
+
+  const csvLines = [
+    headers.join(","),
+    ...rows.map(row => row.map(cell => `"${String(cell || "").replace(/"/g, '""')}"`).join(","))
+  ];
+  // UTF-8 BOM for Arabic support in Microsoft Excel
+  const csvString = "\uFEFF" + csvLines.join("\r\n");
+  const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `RoseAden1_Bookings_${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

@@ -1,4 +1,6 @@
 {
+  "version": 3,
+  "lastUpdated": "2026-10-14T07:48:00Z",
   "config": {
     "nameAr": "فندق روز عدن السياحي",
     "nameEn": "Rose Aden Tourist Hotel",
@@ -56,17 +58,82 @@
       "addressEn": "Aden - Al-Mualla - Main Street (Madram St.) - In front of Al-Kuraimi Bank"
     }
   },
+  "adminUsers": [
+    {
+      "id": 1,
+      "username": "admin",
+      "fullName": "م. عمار محمد سعيد الأسدي",
+      "role": "super_admin",
+      "roleNameAr": "مدير النظام العام (Super Admin)",
+      "email": "prontech.co@gmail.com",
+      "phone": "775043020",
+      "password": "rose1admin",
+      "status": "active",
+      "avatar": "👑",
+      "lastLogin": "2026-10-14 06:45"
+    },
+    {
+      "id": 2,
+      "username": "manager",
+      "fullName": "مدير العمليات الفندقية",
+      "role": "hotel_manager",
+      "roleNameAr": "مدير الفندق (Hotel Manager)",
+      "email": "manager@roseadenhotel.com",
+      "phone": "780000676",
+      "password": "hotel2026",
+      "status": "active",
+      "avatar": "🏨",
+      "lastLogin": "2026-10-13 22:15"
+    },
+    {
+      "id": 3,
+      "username": "reception",
+      "fullName": "مسؤول الاستقبال والحجوزات",
+      "role": "receptionist",
+      "roleNameAr": "موظف استقبال (Receptionist)",
+      "email": "reception@roseadenhotel.com",
+      "phone": "02-238800",
+      "password": "rec123",
+      "status": "active",
+      "avatar": "🛎️",
+      "lastLogin": "2026-10-14 05:30"
+    }
+  ],
+  "design": {
+    "primaryGold": "#c5a059",
+    "goldLight": "#dfbe7d",
+    "oceanBlue": "#1e60c4",
+    "oceanBlueHover": "#0b4da2",
+    "bgBodyDark": "#07132c",
+    "bgCardDark": "#0d1e3d",
+    "whatsappGreen": "#25d366",
+    "fontFamily": "Tajawal",
+    "borderRadius": "18px",
+    "cardStyle": "glassmorphism",
+    "sections": {
+      "hero": true,
+      "metrics": true,
+      "extensions": true,
+      "about": true,
+      "rooms": true,
+      "vip": true,
+      "services": true,
+      "gallery": true,
+      "reviews": true,
+      "contact": true
+    }
+  },
   "rooms": [
     {
       "id": 1,
       "nameAr": "جناح VIP الملكي الفاخر",
       "nameEn": "VIP Royal Sea View Suite",
       "type": "vip",
-      "floor": "الدور الخامس والسادس",
+      "floor": "الدور الخامس (أجنحة VIP الملكية)",
       "priceYER": 0,
       "priceSAR": 0,
       "capacity": "2 - 4 أشخاص",
-      "beds": "سرير كينج ملكي + صالون ضيافة مستقل",
+      "beds": "سرير كينج ملكي كبير + صالون ضيافة",
       "view": "إطلالة بانورامية كاملة على ساحل أبين وبحر العرب",
       "amenities": [
         "شاشة ذكية 55 بوصة",
@@ -88,20 +155,20 @@
       "nameAr": "الجناح العائلي الفسيح",
       "nameEn": "Deluxe Family Sea View Suite",
       "type": "family",
+      "floor": "الدور الرابع الفندقي",
       "priceYER": 0,
       "priceSAR": 0,
       "capacity": "4 - 6 أشخاص",
-      "floor": "الدور الرابع",
-      "beds": "سرير كينج رئيسي + سريران مفردان + جلسة كنب سرير",
+      "beds": "سرير كينج رئيسي + سريران مفردان + كنب سرير",
       "view": "إطلالة بحرية عريضة على أفق ساحل خورمكسر",
       "amenities": [
         "شاشات تلفزيون ذكية",
-        "تكييف متواصل على مدار اليوم",
-        "ثلاجة عائلية",
+        "تكييف سبليت مستمر 24 ساعة",
+        "ثلاجة ميني بار",
         "جلسة معيشة متكاملة",
         "إنترنت فايبر وستارلينك فائق السرعة",
-        "هاتف اتصال مباشر بالاستقبال والمطعم",
-        "خدمة تنظيف يومية متميزة"
+        "هاتف داخلي للخدمات",
+        "خدمة تنظيف وتطهير يومية"
       ],
       "image": "assets/room_family.jpg",
       "status": "متاحة",
@@ -114,19 +181,19 @@
       "nameAr": "الغرفة المزدوجة الفاخرة",
       "nameEn": "Deluxe Twin / Double Room",
       "type": "double",
-      "floor": "الدور الثاني والثالث",
+      "floor": "الدور الثاني الفندقي",
       "priceYER": 0,
       "priceSAR": 0,
       "capacity": "شخصين",
-      "beds": "سرير مزدوج مريح أو سريران منفصلان",
+      "beds": "سرير مزدوج فاخر كبير",
       "view": "إطلالة على نسيم البحر والشارع السياحي الحيوي",
       "amenities": [
-        "أسرّة فندقية طبية مريحة",
-        "تكييف مستمر ومولدات احتياطية",
-        "شاشة LED مع قنوات فضائية",
-        "خزانة ملابس وثلاجة صغيرة",
-        "واي فاي مفتوح عالي السرعة",
-        "حمام خاص متكامل"
+        "تكييف سبليت مستمر 24 ساعة",
+        "شاشة ذكية 55 بوصة",
+        "خزانة ملابس عريضة",
+        "ثلاجة ميني بار",
+        "إنترنت فايبر وستارلينك فائق السرعة",
+        "حمام رخامي مجهز بأحدث التجهيزات"
       ],
       "image": "assets/room_twin.jpg",
       "status": "متاحة",
@@ -139,19 +206,19 @@
       "nameAr": "غرفة الاستجمام بإطلالة بحرية مباشرة",
       "nameEn": "Direct Sea View Leisure Room",
       "type": "seaview",
-      "floor": "الدور الثالث والرابع",
+      "floor": "الدور الثالث الفندقي",
       "priceYER": 0,
       "priceSAR": 0,
       "capacity": "2 - 3 أشخاص",
       "beds": "سرير كينج كبير + ركن كنب للاسترخاء",
       "view": "إطلالة مواجهة لأمواج بحر العرب وشاطئ أبين",
       "amenities": [
-        "واجهة زجاجية عريضة بإطلالة مباشرة",
-        "جلسة كنب فاخرة لمشاهدة البحر",
-        "تكييف هواء بارد متواصل",
-        "شاشة مسطحة وخدمة غرف سريعة",
-        "غلاية شاي وقهوة وثلاجة",
-        "إنترنت فايبر + ستارلينك"
+        "واجهة زجاجية عريضة كاشفة للبحر",
+        "تكييف سبليت مستمر 24 ساعة",
+        "شاشة ذكية 55 بوصة",
+        "غلاية شاي وقهوة وضيافة عدنية",
+        "ثلاجة ميني بار",
+        "إنترنت فايبر وستارلينك فائق السرعة"
       ],
       "image": "assets/room_seaview.jpg",
       "status": "متاحة",
@@ -164,19 +231,20 @@
       "nameAr": "طيرمانة روز عدن VIP الملكية والمجلس العام",
       "nameEn": "Top-Floor Royal VIP Tairmanah & Majlis",
       "type": "tairmanah",
+      "floor": "الدور السادس (السطح الملكي وطيرمانة VIP)",
       "priceYER": 0,
       "priceSAR": 0,
       "capacity": "وفود وجلسات خاصة (حتى 15 شخصاً)",
-      "floor": "الدور السابع ",
-      "beds": "طنافس ومساند تراثية يمنية مذهبة ومريحة جداً",
-      "view": "إطلالة بانورامية بزاوية 360 درجة على شاطئ ساحل أبين ومعالم عدن",
+      "beds": "طنافس ومساند تراثية يمنية مذهبة (طيرمانة VIP)",
+      "view": "إطلالة بانورامية بزاوية 360 درجة كاشفة لشاطئ أبين ومعالم عدن",
       "amenities": [
-        "تحويلة هاتف مخصصة ومباشرة: 701",
-        "شاشات تلفزيون للمتابعة والجلسات",
-        "خدمة شاي وبن عدني ومياه باردة متواصلة",
-        "تكييف سبليت بقوة فائقة وأجواء هادئة معزولة",
-        "خصوصية تامة للاجتماعات والوفود والوجاهات",
-        "واجهات زجاجية كاشفة لغروب وشروق البحر"
+        "تحويلة خاصة 701",
+        "تحويلة خاصة 444",
+        "إطلالة 360 درجة",
+        "شاشة ذكية 55 بوصة",
+        "غلاية شاي وقهوة وضيافة عدنية",
+        "تكييف سبليت مستمر 24 ساعة",
+        "إنترنت فايبر وستارلينك فائق السرعة"
       ],
       "image": "assets/tairmanah.jpg",
       "status": "متاحة",
@@ -316,71 +384,5 @@
       "category": "views",
       "image": "assets/seaview.jpg"
     }
-  ],
-  "adminUsers": [
-    {
-      "id": 1,
-      "username": "admin",
-      "fullName": "م. عمار محمد سعيد الأسدي",
-      "role": "super_admin",
-      "roleNameAr": "مدير النظام العام (Super Admin)",
-      "email": "prontech.co@gmail.com",
-      "phone": "775043020",
-      "password": "Clint@363",
-      "status": "active",
-      "avatar": "👑",
-      "lastLogin": "١٤‏/١٠‏/٢٠٢٦، ٨:٢٩:٠١ ص"
-    },
-    {
-      "id": 2,
-      "username": "manager",
-      "fullName": "مدير العمليات الفندقية",
-      "role": "hotel_manager",
-      "roleNameAr": "مدير الفندق (Hotel Manager)",
-      "email": "manager@roseadenhotel.com",
-      "phone": "780000676",
-      "password": "hotel2026",
-      "status": "active",
-      "avatar": "🏨",
-      "lastLogin": "2026-10-13 22:15"
-    },
-    {
-      "id": 3,
-      "username": "reception",
-      "fullName": "مسؤول الاستقبال والحجوزات",
-      "role": "receptionist",
-      "roleNameAr": "موظف استقبال (Receptionist)",
-      "email": "reception@roseadenhotel.com",
-      "phone": "02-238800",
-      "password": "rec123",
-      "status": "active",
-      "avatar": "🛎️",
-      "lastLogin": "2026-10-14 05:30"
-    }
-  ],
-  "design": {
-    "primaryGold": "#c5a059",
-    "goldLight": "#dfbe7d",
-    "oceanBlue": "#1e60c4",
-    "oceanBlueHover": "#0b4da2",
-    "bgBodyDark": "#07132c",
-    "bgCardDark": "#0d1e3d",
-    "whatsappGreen": "#25d366",
-    "fontFamily": "Tajawal",
-    "borderRadius": "18px",
-    "cardStyle": "glassmorphism",
-    "sections": {
-      "hero": true,
-      "metrics": true,
-      "extensions": true,
-      "about": true,
-      "rooms": true,
-      "vip": true,
-      "services": true,
-      "gallery": true,
-      "reviews": true,
-      "contact": true
-    }
-  },
-  "version": 1791955741689
+  ]
 }

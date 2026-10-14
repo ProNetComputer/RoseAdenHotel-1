@@ -1,7 +1,7 @@
 /**
  * فندق روز عدن السياحي - الفرع الأول (ساحل أبين)
- * ملف البرمجة الشامل للوحة التحكم الاحترافية المطورة (Admin Dashboard Controller v3)
- * يشمل: إدارة الغرف الحية، إدارة المستخدمين، استوديو التصميم، رفع الصور، والمزامنة السحابية المباشرة لـ GitHub Pages
+ * ملف البرمجة الشامل للوحة التحكم الاحترافية المطورة (Admin Dashboard Controller v4)
+ * يشمل: التجاوب الكامل مع الهواتف، إدارة الغرف الحية، إدارة الحجوزات والبحث، إدارة المستخدمين، استوديو التصميم، رفع الصور، ومنظومة الحفظ والتصدير
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 function getCurrentUser() {
   try {
-    const raw = sessionStorage.getItem("rose1_current_user");
+    const raw = safeGetSession("rose1_current_user");
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
@@ -82,7 +82,7 @@ function handleAdminLogin(e) {
     found.lastLogin = new Date().toLocaleString("ar-YE");
     saveHotelData(data);
 
-    sessionStorage.setItem("rose1_current_user", JSON.stringify(found));
+    safeSetSession("rose1_current_user", JSON.stringify(found));
     document.getElementById("adminAuthModal").style.display = "none";
     updateUserTopbarBadge(found);
     showAdminToast(`مرحباً بك يا ${found.fullName}! تم تسجيل الدخول بنجاح.`);
@@ -94,7 +94,7 @@ function handleAdminLogin(e) {
 
 function adminLogout() {
   if (confirm("هل ترغب بتسجيل الخروج من لوحة التحكم؟")) {
-    sessionStorage.removeItem("rose1_current_user");
+    safeSetSession("rose1_current_user", null);
     window.location.reload();
   }
 }
@@ -104,48 +104,90 @@ function initLiveClock() {
   if (!clockEl) return;
   const update = () => {
     const now = new Date();
-    clockEl.textContent = now.toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " | " + now.toLocaleDateString("ar-YE");
+    clockEl.textContent = now.toLocaleTimeString("ar-YE", { hour: '2-digit', minute: '2-digit' }) + " | " + now.toLocaleDateString("ar-YE");
   };
   update();
-  setInterval(update, 1000);
+  setInterval(update, 10000);
+}
+
+function triggerAutosaveIndicator() {
+  const badge = document.getElementById("autosaveBadge");
+  if (!badge) return;
+  badge.innerHTML = "✓ تم الحفظ والمزامنة فوراً";
+  badge.style.background = "rgba(16, 185, 129, 0.28)";
+  setTimeout(() => {
+    badge.innerHTML = "✓ محفوظ ومزامن تلقائياً";
+    badge.style.background = "rgba(16, 185, 129, 0.15)";
+  }, 2500);
 }
 
 // ==========================================
-// 2. SIDEBAR NAVIGATION
+// 2. SIDEBAR & MOBILE BOTTOM NAVIGATION
 // ==========================================
 function initSidebar() {
   const links = document.querySelectorAll(".sidebar-nav li a");
-  const panes = document.querySelectorAll(".tab-pane");
-
   links.forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const targetId = link.getAttribute("data-tab");
-      if (!targetId) return;
-
-      links.forEach(l => l.classList.remove("active"));
-      link.classList.add("active");
-
-      panes.forEach(pane => {
-        if (pane.id === targetId) {
-          pane.classList.add("active");
-        } else {
-          pane.classList.remove("active");
-        }
-      });
-
-      const titleEl = document.querySelector(".topbar-title");
-      if (titleEl) {
-        titleEl.textContent = link.textContent.trim();
-      }
-
-      document.querySelector(".admin-sidebar")?.classList.remove("open");
+      if (targetId) switchAdminTab(targetId);
     });
   });
 }
 
-function toggleMobileSidebar() {
-  document.querySelector(".admin-sidebar")?.classList.toggle("open");
+function switchAdminTab(targetId) {
+  const links = document.querySelectorAll(".sidebar-nav li a");
+  const bottomItems = document.querySelectorAll(".bottom-nav-item[data-tab]");
+  const panes = document.querySelectorAll(".tab-pane");
+
+  let activeTitle = "";
+  links.forEach(l => {
+    if (l.getAttribute("data-tab") === targetId) {
+      l.classList.add("active");
+      activeTitle = l.textContent.trim();
+    } else {
+      l.classList.remove("active");
+    }
+  });
+
+  bottomItems.forEach(b => {
+    if (b.getAttribute("data-tab") === targetId) {
+      b.classList.add("active");
+    } else {
+      b.classList.remove("active");
+    }
+  });
+
+  panes.forEach(pane => {
+    if (pane.id === targetId) {
+      pane.classList.add("active");
+    } else {
+      pane.classList.remove("active");
+    }
+  });
+
+  const titleEl = document.querySelector(".topbar-title");
+  if (titleEl && activeTitle) {
+    titleEl.textContent = activeTitle;
+  }
+
+  toggleMobileSidebar(false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function toggleMobileSidebar(forceState) {
+  const sidebar = document.querySelector(".admin-sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (!sidebar) return;
+
+  const isOpen = typeof forceState === "boolean" ? forceState : !sidebar.classList.contains("open");
+  if (isOpen) {
+    sidebar.classList.add("open");
+    if (backdrop) backdrop.classList.add("active");
+  } else {
+    sidebar.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("active");
+  }
 }
 
 // ==========================================
@@ -175,7 +217,7 @@ function renderDashboard() {
         <td>${b.guestName}</td>
         <td>${b.roomTitle}</td>
         <td>${b.checkIn}</td>
-        <td><span class="badge ${b.status === 'مؤكد' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
+        <td><span class="badge ${b.status === 'مؤكد' ? 'badge-success' : (b.status === 'قيد المراجعة' ? 'badge-warning' : 'badge-danger')}">${b.status}</span></td>
       `;
       listEl.appendChild(tr);
     });
@@ -309,6 +351,23 @@ function initComboboxCatalogs() {
   renderAmenitiesChecklist();
 }
 
+function handlePriceModeChange() {
+  const mode = document.getElementById("rfPriceMode")?.value || "upon_request";
+  const numBox = document.getElementById("rfNumericPriceFields");
+  const customBox = document.getElementById("rfCustomPriceFields");
+
+  if (mode === "numeric") {
+    if (numBox) numBox.style.display = "grid";
+    if (customBox) customBox.style.display = "none";
+  } else if (mode === "custom_text") {
+    if (numBox) numBox.style.display = "none";
+    if (customBox) customBox.style.display = "grid";
+  } else {
+    if (numBox) numBox.style.display = "none";
+    if (customBox) customBox.style.display = "none";
+  }
+}
+
 function renderAmenitiesChecklist(selectedList = []) {
   const container = document.getElementById("rfAmenitiesChecklist");
   if (!container) return;
@@ -343,41 +402,53 @@ function getSelectedAmenitiesFromChecklist() {
 }
 
 // ==========================================
-// 6. ROOMS MANAGER (CRUD WITH INSTANT PROPAGATION)
+// 6. ROOMS MANAGER (CRUD + SEARCH & FILTER)
 // ==========================================
 function renderRoomsTable() {
   const data = getHotelData();
   const tbody = document.getElementById("roomsTableBody");
   if (!tbody) return;
 
+  const searchQ = (document.getElementById("roomSearchInput")?.value || "").trim().toLowerCase();
+  const statusFilter = document.getElementById("roomStatusFilter")?.value || "all";
+
   tbody.innerHTML = "";
-  data.rooms.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><img src="${r.image}" class="table-img" alt="${r.nameAr}"></td>
-      <td><strong>${r.nameAr}</strong><br><small style="color:#94a3b8;">${r.nameEn}</small></td>
-      <td>
-        ${(r.priceYER && r.priceYER > 0 && !r.priceCustom) 
-          ? `<span style="color:#c5a059; font-weight:800;">${r.priceYER.toLocaleString()} ر.ي</span><br><small>(${r.priceSAR} ر.س)</small>`
-          : `<span class="badge badge-warning" style="font-size:0.82rem; padding:4px 10px; background:rgba(197,160,89,0.2); border-color:#c5a059; color:#dfbe7d;">حسب الطلب / أسعار خاصة</span>`}
-      </td>
-      <td>${r.capacity}</td>
-      <td>${r.floor}</td>
-      <td>
-        <span class="badge ${r.status === 'متاحة' ? 'badge-success' : (r.status === 'محجوزة' ? 'badge-warning' : 'badge-danger')}">
-          ${r.status}
-        </span>
-      </td>
-      <td>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-admin" onclick="openEditRoomModal(${r.id})" title="تعديل">✏️</button>
-          <button class="btn-admin btn-admin-success" onclick="toggleRoomStatus(${r.id})" title="تبديل الحالة">🔄</button>
-          <button class="btn-admin btn-admin-danger" onclick="deleteRoom(${r.id})" title="حذف">🗑️</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  data.rooms
+    .filter(r => {
+      const matchSearch = !searchQ ||
+        (r.nameAr || "").toLowerCase().includes(searchQ) ||
+        (r.nameEn || "").toLowerCase().includes(searchQ) ||
+        (r.floor || "").toLowerCase().includes(searchQ);
+      const matchStatus = statusFilter === "all" || r.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .forEach(r => {
+      const tr = document.createElement("tr");
+      const priceLabel = (r.priceYER && r.priceYER > 0 && !r.priceCustom)
+        ? `<span style="color:#c5a059; font-weight:800;">${r.priceYER.toLocaleString()} ر.ي</span><br><small>(${r.priceSAR} ر.س)</small>`
+        : `<span class="badge badge-warning" style="font-size:0.8rem; padding:4px 10px; background:rgba(197,160,89,0.2); border-color:#c5a059; color:#dfbe7d;">${r.priceTextAr || 'حسب الطلب / أسعار خاصة'}</span>`;
+
+      tr.innerHTML = `
+        <td><img src="${r.image}" class="table-img" alt="${r.nameAr}"></td>
+        <td><strong>${r.nameAr}</strong><br><small style="color:#94a3b8;">${r.nameEn}</small></td>
+        <td>${priceLabel}</td>
+        <td>${r.capacity}</td>
+        <td>${r.floor}</td>
+        <td>
+          <span class="badge ${r.status === 'متاحة' ? 'badge-success' : (r.status === 'محجوزة' ? 'badge-warning' : 'badge-danger')}">
+            ${r.status}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-admin btn-icon-only" onclick="openEditRoomModal(${r.id})" title="تعديل الغرفة">✏️</button>
+            <button class="btn-admin btn-admin-success btn-icon-only" onclick="toggleRoomStatus(${r.id})" title="تبديل الحالة">🔄</button>
+            <button class="btn-admin btn-admin-danger btn-icon-only" onclick="deleteRoom(${r.id})" title="حذف الغرفة">🗑️</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
 }
 
 function openAddRoomModal() {
@@ -386,8 +457,13 @@ function openAddRoomModal() {
   document.getElementById("rfNameAr").value = "";
   document.getElementById("rfNameEn").value = "";
   document.getElementById("rfType").value = "double";
+  document.getElementById("rfPriceMode").value = "upon_request";
   document.getElementById("rfPriceYER").value = "0";
   document.getElementById("rfPriceSAR").value = "0";
+  document.getElementById("rfPriceTextAr").value = "حسب الطلب / أسعار خاصة";
+  document.getElementById("rfPriceTextEn").value = "Upon Request / Special Rates";
+  handlePriceModeChange();
+
   document.getElementById("rfCapacity").value = "شخصين";
   document.getElementById("rfFloorSelect").value = "الدور الثاني الفندقي";
   document.getElementById("rfBedSelect").value = "سرير مزدوج فاخر كبير";
@@ -415,8 +491,22 @@ function openEditRoomModal(id) {
   document.getElementById("rfNameAr").value = room.nameAr;
   document.getElementById("rfNameEn").value = room.nameEn;
   document.getElementById("rfType").value = room.type;
-  document.getElementById("rfPriceYER").value = room.priceYER;
-  document.getElementById("rfPriceSAR").value = room.priceSAR;
+
+  const isNumeric = room.priceYER && room.priceYER > 0 && !room.priceCustom;
+  const isCustomText = !isNumeric && room.priceTextAr && room.priceTextAr !== "حسب الطلب / أسعار خاصة";
+  if (isNumeric) {
+    document.getElementById("rfPriceMode").value = "numeric";
+  } else if (isCustomText) {
+    document.getElementById("rfPriceMode").value = "custom_text";
+  } else {
+    document.getElementById("rfPriceMode").value = "upon_request";
+  }
+  document.getElementById("rfPriceYER").value = room.priceYER || 0;
+  document.getElementById("rfPriceSAR").value = room.priceSAR || 0;
+  document.getElementById("rfPriceTextAr").value = room.priceTextAr || "حسب الطلب / أسعار خاصة";
+  document.getElementById("rfPriceTextEn").value = room.priceTextEn || "Upon Request / Special Rates";
+  handlePriceModeChange();
+
   document.getElementById("rfCapacity").value = room.capacity;
   document.getElementById("rfFloorSelect").value = room.floor;
   document.getElementById("rfBedSelect").value = room.beds;
@@ -441,17 +531,34 @@ function saveRoomForm(e) {
   const isEdit = Boolean(idStr);
 
   const selectedAmenities = getSelectedAmenitiesFromChecklist();
+  const mode = document.getElementById("rfPriceMode")?.value || "upon_request";
+
+  let priceYER = 0;
+  let priceSAR = 0;
+  let priceCustom = true;
+  let priceTextAr = "حسب الطلب / أسعار خاصة";
+  let priceTextEn = "Upon Request / Special Rates";
+
+  if (mode === "numeric") {
+    priceYER = parseInt(document.getElementById("rfPriceYER").value) || 0;
+    priceSAR = parseInt(document.getElementById("rfPriceSAR").value) || 0;
+    priceCustom = priceYER <= 0;
+  } else if (mode === "custom_text") {
+    priceTextAr = document.getElementById("rfPriceTextAr").value.trim() || "حسب الطلب / أسعار خاصة";
+    priceTextEn = document.getElementById("rfPriceTextEn").value.trim() || "Upon Request / Special Rates";
+    priceCustom = true;
+  }
 
   const newRoom = {
     id: isEdit ? parseInt(idStr) : Date.now(),
     nameAr: document.getElementById("rfNameAr").value.trim(),
     nameEn: document.getElementById("rfNameEn").value.trim() || document.getElementById("rfNameAr").value.trim(),
     type: document.getElementById("rfType").value,
-    priceYER: parseInt(document.getElementById("rfPriceYER").value) || 0,
-    priceSAR: parseInt(document.getElementById("rfPriceSAR").value) || 0,
-    priceCustom: (parseInt(document.getElementById("rfPriceYER").value) || 0) <= 0,
-    priceTextAr: "حسب الطلب / أسعار خاصة",
-    priceTextEn: "Upon Request / Special Rates",
+    priceYER,
+    priceSAR,
+    priceCustom,
+    priceTextAr,
+    priceTextEn,
     capacity: document.getElementById("rfCapacity").value,
     floor: document.getElementById("rfFloorSelect").value || "الدور الثالث الفندقي",
     beds: document.getElementById("rfBedSelect").value || "سرير مريح",
@@ -469,6 +576,7 @@ function saveRoomForm(e) {
   }
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   document.getElementById("roomEditModal").style.display = "none";
   renderRoomsTable();
   renderDashboard();
@@ -485,6 +593,7 @@ function toggleRoomStatus(id) {
   else room.status = "متاحة";
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderRoomsTable();
   renderDashboard();
   showAdminToast(`تم تحديث حالة (${room.nameAr}) إلى: ${room.status} فورياً!`);
@@ -495,6 +604,7 @@ function deleteRoom(id) {
   const data = getHotelData();
   data.rooms = data.rooms.filter(r => r.id !== id);
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderRoomsTable();
   renderDashboard();
   showAdminToast("تم حذف الغرفة وإزالتها مباشرة من الموقع!");
@@ -514,21 +624,23 @@ function renderUsersManager() {
     const card = document.createElement("div");
     card.className = "user-card";
     card.innerHTML = `
-      <div class="user-card-avatar">${u.avatar || '👤'}</div>
-      <div class="user-card-details">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <h4>${u.fullName}</h4>
-          <span class="badge ${u.status === 'active' ? 'badge-success' : 'badge-danger'}">
-            ${u.status === 'active' ? 'نشط' : 'معطل'}
-          </span>
-          <span class="badge badge-primary">${u.roleNameAr || u.role}</span>
+      <div class="user-card-main">
+        <div class="user-card-avatar">${u.avatar || '👤'}</div>
+        <div class="user-card-details">
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <h4 style="margin:0;">${u.fullName}</h4>
+            <span class="badge ${u.status === 'active' ? 'badge-success' : 'badge-danger'}">
+              ${u.status === 'active' ? 'نشط' : 'معطل'}
+            </span>
+            <span class="badge badge-primary">${u.roleNameAr || u.role}</span>
+          </div>
+          <p>
+            <strong>المستخدم:</strong> <code style="color:#dfbe7d;">${u.username}</code> | 
+            <strong>الهاتف:</strong> ${u.phone} | 
+            <strong>البريد:</strong> ${u.email} | 
+            <strong>آخر دخول:</strong> ${u.lastLogin || 'لم يسجل بعد'}
+          </p>
         </div>
-        <p>
-          <strong>اسم المستخدم:</strong> <code style="color:#dfbe7d;">${u.username}</code> | 
-          <strong>الهاتف:</strong> ${u.phone} | 
-          <strong>البريد:</strong> ${u.email} | 
-          <strong>آخر دخول:</strong> ${u.lastLogin || 'لم يسجل بعد'}
-        </p>
       </div>
       <div class="user-card-actions">
         <button class="btn-admin" onclick="openChangePasswordModal(${u.id})" title="تغيير كلمة المرور">🔑 كلمة المرور</button>
@@ -627,6 +739,7 @@ function saveUserForm(e) {
   }
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   document.getElementById("userEditModal").style.display = "none";
   renderUsersManager();
   renderDashboard();
@@ -653,6 +766,7 @@ function deleteUserAccount(userId) {
   if (confirm(`هل أنت متأكد من حذف حساب (${target.fullName}) نهائياً؟`)) {
     data.adminUsers = data.adminUsers.filter(u => u.id !== userId);
     saveHotelData(data);
+    triggerAutosaveIndicator();
     renderUsersManager();
     renderDashboard();
     showAdminToast("تم حذف الحساب بنجاح!");
@@ -692,6 +806,7 @@ function saveChangePasswordForm(e) {
   if (u) {
     u.password = p1;
     saveHotelData(data);
+    triggerAutosaveIndicator();
     document.getElementById("changePasswordModal").style.display = "none";
     showAdminToast(`تم تغيير كلمة المرور للمستخدم (${u.fullName}) بنجاح!`);
   }
@@ -791,6 +906,7 @@ function saveDesignStudioSettings(e) {
   };
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   showAdminToast("تم حفظ ونشر تخصيصات التصميم مباشرة على كامل الموقع!");
 }
 
@@ -799,46 +915,105 @@ function resetDesignStudioToDefault() {
     const data = getHotelData();
     data.design = defaultDesignSettings;
     saveHotelData(data);
+    triggerAutosaveIndicator();
     renderDesignStudio();
     showAdminToast("تمت استعادة التصميم الافتراضي الأصلي وتطبيقه!");
   }
 }
 
 // ==========================================
-// 9. BOOKINGS MANAGER
+// 9. BOOKINGS MANAGER (WITH SEARCH, FILTER & MANUAL ADD)
 // ==========================================
 function renderBookingsTable() {
   const data = getHotelData();
   const tbody = document.getElementById("bookingsTableBody");
   if (!tbody) return;
 
-  tbody.innerHTML = "";
-  data.bookings.forEach(b => {
-    const tr = document.createElement("tr");
-    const waMsg = encodeURIComponent(`مرحباً أستاذ ${b.guestName}، بخصوص حجزكم في فندق روز عدن السياحي (الفرع الأول) للوحدة (${b.roomTitle}) للفترة ${b.checkIn} إلى ${b.checkOut}.`);
-    const cleanPhone = b.phone.replace(/[^0-9]/g, "");
+  const searchQ = (document.getElementById("bookingSearchInput")?.value || "").trim().toLowerCase();
+  const statusFilter = document.getElementById("bookingStatusFilter")?.value || "all";
 
-    tr.innerHTML = `
-      <td><strong>${b.id}</strong></td>
-      <td><strong>${b.guestName}</strong><br><small style="direction:ltr; display:inline-block;">${b.phone}</small></td>
-      <td>${b.roomTitle}</td>
-      <td>${b.checkIn} ➔ ${b.checkOut}</td>
-      <td>${b.guests}</td>
-      <td>
-        <span class="badge ${b.status === 'مؤكد' ? 'badge-success' : (b.status === 'قيد المراجعة' ? 'badge-warning' : 'badge-danger')}">
-          ${b.status}
-        </span>
-      </td>
-      <td>
-        <div style="display:flex; gap:6px;">
-          <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-admin btn-admin-success" title="مراسلة واتساب">💬</a>
-          <button class="btn-admin" onclick="toggleBookingStatus('${b.id}')" title="تأكيد / تعديل الحالة">✔️</button>
-          <button class="btn-admin btn-admin-danger" onclick="deleteBooking('${b.id}')" title="حذف">🗑️</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  tbody.innerHTML = "";
+  (data.bookings || [])
+    .filter(b => {
+      const matchSearch = !searchQ ||
+        (b.guestName || "").toLowerCase().includes(searchQ) ||
+        (b.phone || "").toLowerCase().includes(searchQ) ||
+        (b.id || "").toLowerCase().includes(searchQ) ||
+        (b.roomTitle || "").toLowerCase().includes(searchQ);
+      const matchStatus = statusFilter === "all" || b.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .forEach(b => {
+      const tr = document.createElement("tr");
+      const waMsg = encodeURIComponent(`مرحباً أستاذ ${b.guestName}، بخصوص حجزكم في فندق روز عدن السياحي (الفرع الأول) للوحدة (${b.roomTitle}) للفترة ${b.checkIn} إلى ${b.checkOut}.`);
+      const cleanPhone = b.phone.replace(/[^0-9]/g, "");
+
+      tr.innerHTML = `
+        <td><strong>${b.id}</strong></td>
+        <td><strong>${b.guestName}</strong><br><small style="direction:ltr; display:inline-block; color:#94a3b8;">${b.phone}</small></td>
+        <td>${b.roomTitle}</td>
+        <td style="white-space:nowrap;">${b.checkIn} ➔ ${b.checkOut}</td>
+        <td>${b.guests}</td>
+        <td>
+          <span class="badge ${b.status === 'مؤكد' ? 'badge-success' : (b.status === 'قيد المراجعة' ? 'badge-warning' : 'badge-danger')}">
+            ${b.status}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-admin btn-admin-success btn-icon-only" title="مراسلة واتساب">💬</a>
+            <button class="btn-admin btn-icon-only" onclick="toggleBookingStatus('${b.id}')" title="تأكيد / تعديل الحالة">✔️</button>
+            <button class="btn-admin btn-admin-danger btn-icon-only" onclick="deleteBooking('${b.id}')" title="حذف">🗑️</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+}
+
+function openAddBookingModal() {
+  const data = getHotelData();
+  const roomSelect = document.getElementById("mbRoomSelect");
+  if (roomSelect) {
+    roomSelect.innerHTML = (data.rooms || []).map(r => `<option value="${r.nameAr}">${r.nameAr}</option>`).join("");
+  }
+  const today = new Date().toISOString().split("T")[0];
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  document.getElementById("mbGuestName").value = "";
+  document.getElementById("mbGuestPhone").value = "";
+  document.getElementById("mbCheckIn").value = today;
+  document.getElementById("mbCheckOut").value = tomorrowDate.toISOString().split("T")[0];
+  document.getElementById("mbGuestsCount").value = "2 بالغين";
+  document.getElementById("mbStatusSelect").value = "مؤكد";
+  document.getElementById("mbNotes").value = "";
+
+  document.getElementById("manualBookingModal").style.display = "flex";
+}
+
+function saveManualBookingForm(e) {
+  e.preventDefault();
+  const data = getHotelData();
+  const newBooking = {
+    id: `BK-${Date.now().toString().slice(-4)}`,
+    guestName: document.getElementById("mbGuestName").value.trim(),
+    phone: document.getElementById("mbGuestPhone").value.trim(),
+    roomTitle: document.getElementById("mbRoomSelect").value,
+    checkIn: document.getElementById("mbCheckIn").value,
+    checkOut: document.getElementById("mbCheckOut").value,
+    guests: document.getElementById("mbGuestsCount").value,
+    status: document.getElementById("mbStatusSelect").value,
+    notes: document.getElementById("mbNotes").value.trim(),
+    dateCreated: new Date().toLocaleString("ar-YE")
+  };
+
+  data.bookings.unshift(newBooking);
+  saveHotelData(data);
+  triggerAutosaveIndicator();
+  document.getElementById("manualBookingModal").style.display = "none";
+  renderBookingsTable();
+  renderDashboard();
+  showAdminToast("تم تسجيل الحجز الجديد بنجاح!");
 }
 
 function toggleBookingStatus(id) {
@@ -851,6 +1026,7 @@ function toggleBookingStatus(id) {
   else b.status = "قيد المراجعة";
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderBookingsTable();
   renderDashboard();
   showAdminToast(`تم تغيير حالة الحجز ${b.id} إلى: ${b.status}`);
@@ -861,6 +1037,7 @@ function deleteBooking(id) {
   const data = getHotelData();
   data.bookings = data.bookings.filter(b => b.id !== id);
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderBookingsTable();
   renderDashboard();
   showAdminToast("تم حذف الحجز بنجاح!");
@@ -903,6 +1080,7 @@ function saveContentSettings(e) {
   }
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   showAdminToast("تم حفظ كافة إعدادات الفندق وتطبيقها مباشرة على كافة الصفحات!");
 }
 
@@ -917,13 +1095,13 @@ function renderGalleryManager() {
   grid.innerHTML = "";
   (data.gallery || []).forEach(g => {
     const card = document.createElement("div");
-    card.style = "background:#0d1e3d; border:1px solid rgba(197,160,89,0.3); border-radius:12px; overflow:hidden; position:relative;";
+    card.style = "background:#0d1e3d; border:1px solid rgba(197,160,89,0.3); border-radius:12px; overflow:hidden; display:flex; flex-direction:column;";
     card.innerHTML = `
-      <img src="${g.image}" style="width:100%; height:140px; object-fit:cover;" alt="${g.titleAr}">
-      <div style="padding:10px;">
-        <h5 style="margin:0 0 6px; font-size:0.85rem; color:#fff;">${g.titleAr}</h5>
-        <span class="badge badge-warning">${g.category}</span>
-        <button class="btn-admin btn-admin-danger" style="margin-top:8px; width:100%; padding:4px;" onclick="deleteGalleryItem(${g.id})">حذف الصورة</button>
+      <img src="${g.image}" style="width:100%; height:145px; object-fit:cover;" alt="${g.titleAr}">
+      <div style="padding:12px; display:flex; flex-direction:column; gap:6px; flex:1;">
+        <h5 style="margin:0; font-size:0.86rem; color:#fff; line-height:1.4;">${g.titleAr}</h5>
+        <div><span class="badge badge-warning">${g.category}</span></div>
+        <button class="btn-admin btn-admin-danger" style="margin-top:auto; width:100%; padding:6px; font-size:0.8rem;" onclick="deleteGalleryItem(${g.id})">🗑️ حذف الصورة</button>
       </div>
     `;
     grid.appendChild(card);
@@ -963,6 +1141,7 @@ function saveGalleryUploadForm(e) {
   });
 
   saveHotelData(data);
+  triggerAutosaveIndicator();
   document.getElementById("galleryUploadModal").style.display = "none";
   renderGalleryManager();
   showAdminToast("تمت إضافة الصورة ونشرها في معرض الموقع مباشرة!");
@@ -973,6 +1152,7 @@ function deleteGalleryItem(id) {
   const data = getHotelData();
   data.gallery = data.gallery.filter(g => g.id !== id);
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderGalleryManager();
   showAdminToast("تم حذف الصورة وتحديث المعرض مباشرة!");
 }
@@ -985,17 +1165,53 @@ function renderReviewsManager() {
   list.innerHTML = "";
   (data.reviews || []).forEach(rev => {
     const item = document.createElement("div");
-    item.style = "background:#0d1e3d; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem; margin-bottom:1rem;";
+    item.style = "background:rgba(255,255,255,0.03); border:1px solid rgba(197,160,89,0.25); border-radius:12px; padding:1.2rem; margin-bottom:1rem;";
     item.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <strong>${rev.authorAr}</strong>
-        <span style="color:#f59e0b;">${'★'.repeat(rev.rating)}</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+        <div>
+          <strong style="color:#fff; font-size:0.95rem;">${rev.authorAr}</strong>
+          <span style="color:#94a3b8; font-size:0.78rem; margin-right:8px;">(${rev.date || 'نزيل موثق'})</span>
+        </div>
+        <span style="color:#f59e0b; font-size:1rem;">${'★'.repeat(rev.rating || 5)}</span>
       </div>
-      <p style="color:#cbd5e1; font-size:0.9rem; margin-bottom:10px;">${rev.commentAr}</p>
-      <button class="btn-admin btn-admin-danger" style="padding:4px 10px; font-size:0.8rem;" onclick="deleteReview(${rev.id})">حذف التقييم</button>
+      <p style="color:#cbd5e1; font-size:0.88rem; margin-bottom:10px; line-height:1.7;">${rev.commentAr}</p>
+      <button class="btn-admin btn-admin-danger" style="padding:5px 12px; font-size:0.8rem;" onclick="deleteReview(${rev.id})">🗑️ حذف التقييم</button>
     `;
     list.appendChild(item);
   });
+}
+
+function openAddReviewModal() {
+  document.getElementById("revAuthorAr").value = "";
+  document.getElementById("revRating").value = "5";
+  document.getElementById("revDate").value = "أكتوبر 2026";
+  document.getElementById("revCommentAr").value = "";
+  document.getElementById("addReviewModal").style.display = "flex";
+}
+
+function saveReviewForm(e) {
+  e.preventDefault();
+  const data = getHotelData();
+  const authorAr = document.getElementById("revAuthorAr").value.trim();
+  const commentAr = document.getElementById("revCommentAr").value.trim();
+  const rating = parseInt(document.getElementById("revRating").value) || 5;
+  const date = document.getElementById("revDate").value.trim() || "أكتوبر 2026";
+
+  data.reviews.unshift({
+    id: Date.now(),
+    authorAr,
+    authorEn: authorAr,
+    rating,
+    date,
+    commentAr,
+    commentEn: commentAr
+  });
+
+  saveHotelData(data);
+  triggerAutosaveIndicator();
+  document.getElementById("addReviewModal").style.display = "none";
+  renderReviewsManager();
+  showAdminToast("تمت إضافة شهادة النزيل ونشرها مباشرة على الموقع!");
 }
 
 function deleteReview(id) {
@@ -1003,21 +1219,22 @@ function deleteReview(id) {
   const data = getHotelData();
   data.reviews = data.reviews.filter(r => r.id !== id);
   saveHotelData(data);
+  triggerAutosaveIndicator();
   renderReviewsManager();
   showAdminToast("تم حذف التقييم وتحديث الموقع مباشرة!");
 }
 
 // ==========================================
-// 12. GITHUB PAGES CLOUD PUBLISHER & SYNC (النشر السحابي المباشر)
+// 12. GITHUB PAGES CLOUD PUBLISHER & SYNC
 // ==========================================
 function initPublishingSettings() {
   const repoEl = document.getElementById("ghRepoInput");
   const branchEl = document.getElementById("ghBranchInput");
   const tokenEl = document.getElementById("ghTokenInput");
 
-  if (repoEl) repoEl.value = localStorage.getItem("rose1_gh_repo") || "pronetcomputer/RoseAdenHotel-1";
-  if (branchEl) branchEl.value = localStorage.getItem("rose1_gh_branch") || "main";
-  if (tokenEl) tokenEl.value = localStorage.getItem("rose1_gh_token") || "";
+  if (repoEl) repoEl.value = safeGetLocal("rose1_gh_repo") || "pronetcomputer/RoseAdenHotel-1";
+  if (branchEl) branchEl.value = safeGetLocal("rose1_gh_branch") || "main";
+  if (tokenEl) tokenEl.value = safeGetLocal("rose1_gh_token") || "";
 }
 
 async function publishDataToGitHubPages() {
@@ -1031,10 +1248,9 @@ async function publishDataToGitHubPages() {
   statusBox.style.display = "block";
   statusBox.innerHTML = `⏳ جاري تجهيز البيانات وحساب التشفير للاتصال بـ GitHub API...`;
 
-  // حفظ الإعدادات للاستخدام المستقبلي
-  localStorage.setItem("rose1_gh_repo", repo);
-  localStorage.setItem("rose1_gh_branch", branch);
-  if (token) localStorage.setItem("rose1_gh_token", token);
+  safeSetLocal("rose1_gh_repo", repo);
+  safeSetLocal("rose1_gh_branch", branch);
+  if (token) safeSetLocal("rose1_gh_token", token);
 
   const data = getHotelData();
   const jsonString = JSON.stringify(data, null, 2);
@@ -1043,8 +1259,11 @@ async function publishDataToGitHubPages() {
   if (!token) {
     statusBox.innerHTML = `
       <div style="color:#fbbf24; font-weight:800; margin-bottom:8px;">⚠️ تنبيه: لم يتم إدخال رمز الوصول الشخصي (GitHub Personal Access Token)</div>
-      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:10px;">تم تطبيق التعديلات بنجاح محلياً ولحظياً في هذا المتصفح. للنشر التلقائي عبر GitHub API مباشرة إلى المستودع، يرجى إدخال الرمز، أو تنزيل ملف <code>data.json</code> ورفعه للمستودع بنقرة واحدة أدناه.</p>
-      <button class="btn-admin" onclick="exportDataAsJSON()">📥 تنزيل ملف data.json المحدث لرفعه للمستودع</button>
+      <p style="font-size:0.85rem; color:#cbd5e1; margin-bottom:12px;">تم تطبيق التعديلات بنجاح محلياً ولحظياً في هذا المتصفح. للنشر التلقائي عبر GitHub API مباشرة إلى المستودع، يرجى إدخال الرمز، أو تنزيل ملفات التحديث المدمجة أدناه لرفعها للمستودع بنقرة واحدة:</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn-admin" onclick="exportDataAsJSON()">📥 تنزيل data.json المحدث</button>
+        <button class="btn-admin btn-admin-secondary" onclick="exportDataAsJSFile()">💻 تنزيل ملف js/data.js المدمج</button>
+      </div>
     `;
     return;
   }
@@ -1052,7 +1271,6 @@ async function publishDataToGitHubPages() {
   try {
     statusBox.innerHTML = `🔄 جاري الاستعلام عن حالة ملف data.json في مستودع (${repo})...`;
 
-    // 1. Get current SHA of data.json if exists
     let sha = null;
     const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/data.json?ref=${branch}`, {
       headers: {
@@ -1066,7 +1284,6 @@ async function publishDataToGitHubPages() {
       sha = getJson.sha;
     }
 
-    // 2. Put file with commit
     statusBox.innerHTML = `🚀 جاري إرسال البيانات المحدثة وعمل Commit ونشرها على GitHub Pages...`;
 
     const putBody = {
@@ -1089,7 +1306,7 @@ async function publishDataToGitHubPages() {
     if (putRes.ok) {
       const putResult = await putRes.json();
       statusBox.innerHTML = `
-        <div style="color:#34d399; font-weight:900; font-size:1.1rem; margin-bottom:6px;">
+        <div style="color:#34d399; font-weight:900; font-size:1.05rem; margin-bottom:6px;">
           🎉 تم النشر السحابي المباشر بنجاح على GitHub Pages!
         </div>
         <div style="font-size:0.85rem; color:#cbd5e1;">
@@ -1103,8 +1320,9 @@ async function publishDataToGitHubPages() {
       statusBox.innerHTML = `
         <div style="color:#f87171; font-weight:800;">❌ تعذر إتمام النشر عبر GitHub API:</div>
         <div style="font-size:0.85rem; color:#fca5a5; margin-top:4px;">${errJson.message || 'يرجى التحقق من صلاحيات رمز الوصول Token واسم المستودع.'}</div>
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn-admin" onclick="exportDataAsJSON()">📥 تنزيل data.json ورفعه يدوياً</button>
+          <button class="btn-admin btn-admin-secondary" onclick="exportDataAsJSFile()">💻 تنزيل js/data.js المدمج</button>
         </div>
       `;
     }
