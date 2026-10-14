@@ -1,10 +1,23 @@
 /**
  * فندق روز عدن السياحي - الفرع الأول (ساحل أبين)
- * قاعدة البيانات المركزية المتكاملة والتهيئة الأولية (Centralized Data & Store)
+ * قاعدة البيانات المركزية المتطورة ومحرك المزامنة اللحظية (Centralized Data & Live Sync v3)
+ * يدعم: المزامنة السحابية عبر data.json، البث اللحظي عبر BroadcastChannel، والتخزين المحلي
  */
 
 const STORAGE_KEY = 'rose_aden_1_data';
+const SYNC_CHANNEL_NAME = 'rose1_hotel_live_sync';
 
+// قناة المزامنة اللحظية بين جميع التبويبات المفتوحة
+let syncChannel = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+  }
+} catch (e) {
+  console.warn("BroadcastChannel not supported in this browser:", e);
+}
+
+// 1. الإعدادات العامة لهوية الفندق
 const defaultHotelConfig = {
   nameAr: "فندق روز عدن السياحي",
   nameEn: "Rose Aden Tourist Hotel",
@@ -43,17 +56,146 @@ const defaultHotelConfig = {
   }
 };
 
+// 2. مستخدمو لوحة التحكم وإدارة الصلاحيات
+const defaultAdminUsers = [
+  {
+    id: 1,
+    username: "admin",
+    fullName: "م. عمار محمد سعيد الأسدي",
+    role: "super_admin",
+    roleNameAr: "مدير النظام العام (Super Admin)",
+    email: "prontech.co@gmail.com",
+    phone: "775043020",
+    password: "rose1admin",
+    status: "active",
+    avatar: "👑",
+    lastLogin: "2026-10-14 06:45"
+  },
+  {
+    id: 2,
+    username: "manager",
+    fullName: "مدير العمليات الفندقية",
+    role: "hotel_manager",
+    roleNameAr: "مدير الفندق (Hotel Manager)",
+    email: "manager@roseadenhotel.com",
+    phone: "780000676",
+    password: "hotel2026",
+    status: "active",
+    avatar: "🏨",
+    lastLogin: "2026-10-13 22:15"
+  },
+  {
+    id: 3,
+    username: "reception",
+    fullName: "مسؤول الاستقبال والحجوزات",
+    role: "receptionist",
+    roleNameAr: "موظف استقبال (Receptionist)",
+    email: "reception@roseadenhotel.com",
+    phone: "02-238800",
+    password: "rec123",
+    status: "active",
+    avatar: "🛎️",
+    lastLogin: "2026-10-14 05:30"
+  }
+];
+
+// 3. تخصيص تصميم ومظهر الموقع
+const defaultDesignSettings = {
+  primaryGold: "#c5a059",
+  goldLight: "#dfbe7d",
+  oceanBlue: "#1e60c4",
+  oceanBlueHover: "#0b4da2",
+  bgBodyDark: "#07132c",
+  bgCardDark: "#0d1e3d",
+  whatsappGreen: "#25d366",
+  fontFamily: "Tajawal",
+  borderRadius: "18px",
+  cardStyle: "glassmorphism",
+  sections: {
+    hero: true,
+    metrics: true,
+    extensions: true,
+    about: true,
+    rooms: true,
+    vip: true,
+    services: true,
+    gallery: true,
+    reviews: true,
+    contact: true
+  }
+};
+
+// 4. خيارات القوائم المنسدلة ومحسنات الإدخال
+const inputCatalogs = {
+  floors: [
+    "الدور الأرضي (الاستقبال واللوبي)",
+    "الدور الأول الفندقي",
+    "الدور الثاني الفندقي",
+    "الدور الثالث الفندقي",
+    "الدور الرابع الفندقي",
+    "الدور الخامس (أجنحة VIP الملكية)",
+    "الدور السادس (السطح الملكي وطيرمانة VIP)"
+  ],
+  roomTypes: [
+    { value: "vip", labelAr: "جناح VIP الملكي الفاخر", labelEn: "VIP Royal Suite" },
+    { value: "family", labelAr: "الجناح العائلي الفسيح", labelEn: "Deluxe Family Suite" },
+    { value: "double", labelAr: "الغرفة المزدوجة الفاخرة", labelEn: "Deluxe Twin / Double Room" },
+    { value: "seaview", labelAr: "غرفة الاستجمام بإطلالة بحرية", labelEn: "Sea View Leisure Room" },
+    { value: "tairmanah", labelAr: "طيرمانة روز عدن VIP والمجلس", labelEn: "Top-Floor Royal Tairmanah" }
+  ],
+  bedOptions: [
+    "سرير كينج ملكي كبير + صالون ضيافة",
+    "سرير كينج رئيسي + سريران مفردان + كنب سرير",
+    "سرير مزدوج فاخر كبير",
+    "سريران مفردان منفصلان",
+    "سرير كينج كبير + ركن كنب للاسترخاء",
+    "طنافس ومساند تراثية يمنية مذهبة (طيرمانة VIP)"
+  ],
+  viewOptions: [
+    "إطلالة بانورامية كاملة على ساحل أبين وبحر العرب",
+    "إطلالة مواجهة لأمواج بحر العرب وشاطئ أبين",
+    "إطلالة بحرية عريضة على أفق ساحل خورمكسر",
+    "إطلالة على نسيم البحر والشارع السياحي الحيوي",
+    "إطلالة بانورامية بزاوية 360 درجة كاشفة لشاطئ أبين ومعالم عدن"
+  ],
+  amenityCatalog: [
+    "تكييف سبليت مستمر 24 ساعة",
+    "شاشة ذكية 55 بوصة",
+    "إنترنت فايبر وستارلينك فائق السرعة",
+    "ثلاجة ميني بار",
+    "هاتف داخلي للخدمات",
+    "حمام رخامي مجهز بأحدث التجهيزات",
+    "صالون جلوس فاخر ومكتب عمل",
+    "غلاية شاي وقهوة وضيافة عدنية",
+    "خزانة ملابس عريضة",
+    "خدمة تنظيف وتطهير يومية",
+    "تحويلة خاصة 701",
+    "تحويلة خاصة 444",
+    "واجهة زجاجية عريضة كاشفة للبحر",
+    "إطلالة 360 درجة"
+  ],
+  statusOptions: [
+    { value: "متاحة", label: "متاحة للحجز الفوري", badgeClass: "badge-success" },
+    { value: "محجوزة", label: "محجوزة حالياً", badgeClass: "badge-warning" },
+    { value: "صيانة", label: "تحت الصيانة الدورية", badgeClass: "badge-danger" }
+  ]
+};
+
+// 5. الغرف الافتراضية
 const defaultRooms = [
   {
     id: 1,
     nameAr: "جناح VIP الملكي الفاخر",
     nameEn: "VIP Royal Sea View Suite",
     type: "vip",
-    floor: "الدور الخامس والسادس",
-    priceYER: 85000,
-    priceSAR: 550,
+    floor: "الدور الخامس (أجنحة VIP الملكية)",
+    priceTextAr: "حسب الطلب / أسعار خاصة",
+    priceTextEn: "Upon Request / Special Rates",
+    priceYER: 0,
+    priceSAR: 0,
+    priceCustom: true,
     capacity: "2 - 4 أشخاص",
-    beds: "سرير كينج ملكي + صالون ضيافة مستقل",
+    beds: "سرير كينج ملكي كبير + صالون ضيافة",
     view: "إطلالة بانورامية كاملة على ساحل أبين وبحر العرب",
     amenities: [
       "شاشة ذكية 55 بوصة",
@@ -72,20 +214,23 @@ const defaultRooms = [
     nameAr: "الجناح العائلي الفسيح",
     nameEn: "Deluxe Family Sea View Suite",
     type: "family",
-    floor: "الدور الرابع",
-    priceYER: 65000,
-    priceSAR: 420,
+    floor: "الدور الرابع الفندقي",
+    priceTextAr: "حسب الطلب / أسعار خاصة",
+    priceTextEn: "Upon Request / Special Rates",
+    priceYER: 0,
+    priceSAR: 0,
+    priceCustom: true,
     capacity: "4 - 6 أشخاص",
-    beds: "سرير كينج رئيسي + سريران مفردان + جلسة كنب سرير",
+    beds: "سرير كينج رئيسي + سريران مفردان + كنب سرير",
     view: "إطلالة بحرية عريضة على أفق ساحل خورمكسر",
     amenities: [
       "شاشات تلفزيون ذكية",
-      "تكييف متواصل على مدار اليوم",
-      "ثلاجة عائلية",
+      "تكييف سبليت مستمر 24 ساعة",
+      "ثلاجة ميني بار",
       "جلسة معيشة متكاملة",
       "إنترنت فايبر وستارلينك فائق السرعة",
-      "هاتف اتصال مباشر بالاستقبال والمطعم",
-      "خدمة تنظيف يومية متميزة"
+      "هاتف داخلي للخدمات",
+      "خدمة تنظيف وتطهير يومية"
     ],
     image: "assets/room_family.jpg",
     status: "متاحة"
@@ -95,19 +240,22 @@ const defaultRooms = [
     nameAr: "الغرفة المزدوجة الفاخرة",
     nameEn: "Deluxe Twin / Double Room",
     type: "double",
-    floor: "الدور الثاني والثالث",
-    priceYER: 45000,
-    priceSAR: 300,
+    floor: "الدور الثاني الفندقي",
+    priceTextAr: "حسب الطلب / أسعار خاصة",
+    priceTextEn: "Upon Request / Special Rates",
+    priceYER: 0,
+    priceSAR: 0,
+    priceCustom: true,
     capacity: "شخصين",
-    beds: "سرير مزدوج مريح أو سريران منفصلان",
+    beds: "سرير مزدوج فاخر كبير",
     view: "إطلالة على نسيم البحر والشارع السياحي الحيوي",
     amenities: [
-      "أسرّة فندقية طبية مريحة",
-      "تكييف مستمر ومولدات احتياطية",
-      "شاشة LED مع قنوات فضائية",
-      "خزانة ملابس وثلاجة صغيرة",
-      "واي فاي مفتوح عالي السرعة",
-      "حمام خاص متكامل"
+      "تكييف سبليت مستمر 24 ساعة",
+      "شاشة ذكية 55 بوصة",
+      "خزانة ملابس عريضة",
+      "ثلاجة ميني بار",
+      "إنترنت فايبر وستارلينك فائق السرعة",
+      "حمام رخامي مجهز بأحدث التجهيزات"
     ],
     image: "assets/room_twin.jpg",
     status: "متاحة"
@@ -117,19 +265,22 @@ const defaultRooms = [
     nameAr: "غرفة الاستجمام بإطلالة بحرية مباشرة",
     nameEn: "Direct Sea View Leisure Room",
     type: "seaview",
-    floor: "الدور الثالث والرابع",
-    priceYER: 55000,
-    priceSAR: 360,
+    floor: "الدور الثالث الفندقي",
+    priceTextAr: "حسب الطلب / أسعار خاصة",
+    priceTextEn: "Upon Request / Special Rates",
+    priceYER: 0,
+    priceSAR: 0,
+    priceCustom: true,
     capacity: "2 - 3 أشخاص",
     beds: "سرير كينج كبير + ركن كنب للاسترخاء",
     view: "إطلالة مواجهة لأمواج بحر العرب وشاطئ أبين",
     amenities: [
-      "واجهة زجاجية عريضة بإطلالة مباشرة",
-      "جلسة كنب فاخرة لمشاهدة البحر",
-      "تكييف هواء بارد متواصل",
-      "شاشة مسطحة وخدمة غرف سريعة",
-      "غلاية شاي وقهوة وثلاجة",
-      "إنترنت فايبر + ستارلينك"
+      "واجهة زجاجية عريضة كاشفة للبحر",
+      "تكييف سبليت مستمر 24 ساعة",
+      "شاشة ذكية 55 بوصة",
+      "غلاية شاي وقهوة وضيافة عدنية",
+      "ثلاجة ميني بار",
+      "إنترنت فايبر وستارلينك فائق السرعة"
     ],
     image: "assets/room_seaview.jpg",
     status: "متاحة"
@@ -139,19 +290,23 @@ const defaultRooms = [
     nameAr: "طيرمانة روز عدن VIP الملكية والمجلس العام",
     nameEn: "Top-Floor Royal VIP Tairmanah & Majlis",
     type: "tairmanah",
-    floor: "الدور السادس (السطح الملكي)",
-    priceYER: 110000,
-    priceSAR: 700,
+    floor: "الدور السادس (السطح الملكي وطيرمانة VIP)",
+    priceTextAr: "حسب الطلب / أسعار خاصة",
+    priceTextEn: "Upon Request / Special Rates",
+    priceYER: 0,
+    priceSAR: 0,
+    priceCustom: true,
     capacity: "وفود وجلسات خاصة (حتى 15 شخصاً)",
-    beds: "طنافس ومساند تراثية يمنية مذهبة ومريحة جداً",
-    view: "إطلالة بانورامية بزاوية 360 درجة على شاطئ أبين ومعالم عدن",
+    beds: "طنافس ومساند تراثية يمنية مذهبة (طيرمانة VIP)",
+    view: "إطلالة بانورامية بزاوية 360 درجة كاشفة لشاطئ أبين ومعالم عدن",
     amenities: [
-      "تحويلة هاتف مخصصة ومباشرة: 701",
-      "شاشات تلفزيون عملاقة للمتابعة والجلسات",
-      "خدمة شاي وبن عدني ومياه باردة متواصلة",
-      "تكييف سبليت بقوة فائقة وأجواء هادئة معزولة",
-      "خصوصية تامة للاجتماعات والوفود والوجاهات",
-      "واجهات زجاجية كاشفة لغروب وشروق البحر"
+      "تحويلة خاصة 701",
+      "تحويلة خاصة 444",
+      "إطلالة 360 درجة",
+      "شاشة ذكية 55 بوصة",
+      "غلاية شاي وقهوة وضيافة عدنية",
+      "تكييف سبليت مستمر 24 ساعة",
+      "إنترنت فايبر وستارلينك فائق السرعة"
     ],
     image: "assets/tairmanah.jpg",
     status: "متاحة"
@@ -239,13 +394,16 @@ const defaultGallery = [
   { id: 9, titleAr: "إطلالة بانورامية على كورنيش ساحل أبين", titleEn: "Panoramic View of Abyan Beach", category: "views", image: "assets/seaview.jpg" }
 ];
 
-// Data access functions with localStorage caching
+// دالة جلب البيانات مع الفحص والدمج الذكي
 function getHotelData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       const initial = {
+        version: Date.now(),
         config: defaultHotelConfig,
+        adminUsers: defaultAdminUsers,
+        design: defaultDesignSettings,
         rooms: defaultRooms,
         bookings: defaultBookings,
         reviews: defaultReviews,
@@ -254,11 +412,44 @@ function getHotelData() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
       return initial;
     }
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    let updated = false;
+
+    if (!data.adminUsers || !Array.isArray(data.adminUsers) || data.adminUsers.length === 0) {
+      data.adminUsers = defaultAdminUsers;
+      updated = true;
+    }
+    if (!data.design) {
+      data.design = defaultDesignSettings;
+      updated = true;
+    }
+    if (!data.rooms || !Array.isArray(data.rooms) || data.rooms.length === 0) {
+      data.rooms = defaultRooms;
+      updated = true;
+    } else {
+      // تحديث الأسعار لتكون افتراضياً: حسب الطلب / أسعار خاصة لجميع الغرف
+      data.rooms.forEach(r => {
+        if (!r.priceTextAr || r.priceYER > 0) {
+          r.priceTextAr = "حسب الطلب / أسعار خاصة";
+          r.priceTextEn = "Upon Request / Special Rates";
+          r.priceCustom = true;
+          r.priceYER = 0;
+          r.priceSAR = 0;
+          updated = true;
+        }
+      });
+    }
+    if (updated) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    return data;
   } catch (e) {
     console.error("Error reading localStorage, using defaults:", e);
     return {
+      version: Date.now(),
       config: defaultHotelConfig,
+      adminUsers: defaultAdminUsers,
+      design: defaultDesignSettings,
       rooms: defaultRooms,
       bookings: defaultBookings,
       reviews: defaultReviews,
@@ -267,9 +458,19 @@ function getHotelData() {
   }
 }
 
+// دالة الحفظ مع البث اللحظي لجميع التبويبات المفتوحة
 function saveHotelData(data) {
   try {
+    data.version = Date.now();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+    // إشعار سائر التبويبات المفتوحة عبر BroadcastChannel
+    if (syncChannel) {
+      syncChannel.postMessage({
+        type: 'HOTEL_DATA_UPDATED',
+        timestamp: data.version
+      });
+    }
     return true;
   } catch (e) {
     console.error("Error saving data to localStorage:", e);
@@ -279,24 +480,34 @@ function saveHotelData(data) {
 
 function resetHotelData() {
   const initial = {
+    version: Date.now(),
     config: defaultHotelConfig,
+    adminUsers: defaultAdminUsers,
+    design: defaultDesignSettings,
     rooms: defaultRooms,
     bookings: defaultBookings,
     reviews: defaultReviews,
     gallery: defaultGallery
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+
+  if (syncChannel) {
+    syncChannel.postMessage({
+      type: 'HOTEL_DATA_RESET',
+      timestamp: initial.version
+    });
+  }
   return initial;
 }
 
-// Export data as JSON download
+// دالة تصدير النسخة الاحتياطية JSON
 function exportDataAsJSON() {
   const data = getHotelData();
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `RoseAden1_Hotel_Data_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `data.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

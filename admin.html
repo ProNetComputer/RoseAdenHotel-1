@@ -3,45 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الفندقية | فندق روز عدن السياحي (الفرع الأول)</title>
+  <title>لوحة التحكم الفندقية الاحترافية | فندق روز عدن السياحي (الفرع الأول)</title>
   
   <link rel="icon" type="image/png" href="assets/favicon.png">
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body class="admin-body">
 
-  <!-- Password Authentication Modal -->
-  <div id="adminAuthModal" style="position:fixed; inset:0; background:rgba(4,9,21,0.95); z-index:9999; display:flex; align-items:center; justify-content:center; padding:1.5rem;">
-    <div style="background:#0d1e3d; border:2px solid #c5a059; border-radius:18px; max-width:440px; width:100%; padding:2.5rem; text-align:center; box-shadow:0 20px 45px rgba(0,0,0,0.7);">
-      <img src="assets/logo_emblem.png" alt="شعار فندق روز عدن" style="height:65px; margin-bottom:1rem; border-radius:50%; border:2px solid #c5a059;">
-      <h3 style="color:#ffffff; font-size:1.4rem; font-weight:900; margin-bottom:6px;">لوحة تحكم فندق روز عدن 1</h3>
-      <p style="color:#94a3b8; font-size:0.88rem; margin-bottom:1.8rem;">يرجى إدخال كلمة مرور الإدارة المعتمدة للمتابعة:</p>
+  <!-- ==============================================
+       1. AUTHENTICATION & LOGIN MODAL
+       ============================================== -->
+  <div id="adminAuthModal" style="position:fixed; inset:0; background:rgba(4,9,21,0.96); z-index:9999; display:flex; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(10px);">
+    <div style="background:#0d1e3d; border:2px solid #c5a059; border-radius:20px; max-width:440px; width:100%; padding:2.5rem; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.85);">
+      <img src="assets/logo_emblem.png" alt="شعار فندق روز عدن" style="height:70px; margin-bottom:1rem; border-radius:50%; border:2.5px solid #c5a059; box-shadow:0 4px 15px rgba(197,160,89,0.35);">
+      <h3 style="color:#ffffff; font-size:1.45rem; font-weight:900; margin-bottom:6px;">لوحة تحكم فندق روز عدن 1</h3>
+      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.8rem;">بوابة الإدارة المركزية وحسابات المستخدمين المعتمدة</p>
 
       <form onsubmit="handleAdminLogin(event)">
-        <input type="password" id="adminPassInput" class="admin-input" placeholder="كلمة المرور (الافتراضية: rose1admin)" required style="margin-bottom:1.2rem; text-align:center;">
-        <button type="submit" class="btn-admin" style="width:100%; justify-content:center; padding:0.8rem; font-size:1rem;">
-          🔑 تسجيل الدخول إلى اللوحة
+        <div class="form-group" style="text-align:right;">
+          <label style="font-size:0.85rem;">اسم المستخدم أو البريد:</label>
+          <div class="input-icon-group">
+            <span class="icon">👤</span>
+            <input type="text" id="adminUsernameInput" class="admin-input" placeholder="اسم المستخدم (مثال: admin)" required value="admin">
+          </div>
+        </div>
+
+        <div class="form-group" style="text-align:right;">
+          <label style="font-size:0.85rem;">كلمة المرور:</label>
+          <div class="input-icon-group">
+            <span class="icon">🔒</span>
+            <input type="password" id="adminPassInput" class="admin-input" placeholder="كلمة المرور" required value="rose1admin">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-admin" style="width:100%; justify-content:center; padding:0.85rem; font-size:1rem; margin-top:0.8rem;">
+          🔑 تسجيل الدخول إلى النظام
         </button>
       </form>
-      <div style="margin-top:1.5rem;">
-        <a href="index.html" style="color:#38bdf8; font-size:0.85rem; text-decoration:none;">➔ العودة للموقع العام</a>
+
+      <div style="margin-top:1.6rem; padding-top:1.2rem; border-top:1px solid rgba(255,255,255,0.08); font-size:0.8rem; color:#94a3b8;">
+        <span style="color:#dfbe7d;">الحساب الافتراضي:</span> اسم المستخدم <code>admin</code> / كلمة المرور <code>rose1admin</code>
+        <div style="margin-top:8px;">
+          <a href="index.html" style="color:#38bdf8; text-decoration:none; font-weight:700;">➔ العودة لموقع الفندق العام</a>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Sidebar -->
+  <!-- ==============================================
+       2. SIDEBAR NAVIGATION
+       ============================================== -->
   <aside class="admin-sidebar">
     <div class="sidebar-header">
       <img src="assets/logo_emblem.png" alt="شعار روز عدن" class="sidebar-logo">
       <div class="sidebar-brand">
         <h3>روز عدن 1</h3>
-        <span>لوحة التحكم الفندقية</span>
+        <span>الفرع الأول - ساحل أبين</span>
+      </div>
+    </div>
+
+    <!-- Active User Profile Pill in Sidebar -->
+    <div class="sidebar-user-pill">
+      <div class="sidebar-user-avatar" id="sideUserAvatar">👑</div>
+      <div class="sidebar-user-info">
+        <div class="user-name" id="sideUserName">م. عمار الأسدي</div>
+        <div class="user-role" id="sideUserRole">مدير النظام العام</div>
       </div>
     </div>
 
@@ -49,9 +81,12 @@
       <li><a href="#" class="active" data-tab="tab-overview"><span class="nav-icon">📊</span> لوحة المؤشرات</a></li>
       <li><a href="#" data-tab="tab-rooms"><span class="nav-icon">🏨</span> إدارة الغرف والأجنحة</a></li>
       <li><a href="#" data-tab="tab-bookings"><span class="nav-icon">📑</span> سجل الحجوزات والطلبات</a></li>
-      <li><a href="#" data-tab="tab-content"><span class="nav-icon">✏️</span> تعديل بيانات ومحتوى الفندق</a></li>
+      <li><a href="#" data-tab="tab-design"><span class="nav-icon">🎨</span> استوديو تخصيص التصميم</a></li>
+      <li><a href="#" data-tab="tab-users"><span class="nav-icon">👥</span> إدارة المستخدمين والأمان</a></li>
+      <li><a href="#" data-tab="tab-content"><span class="nav-icon">✏️</span> بيانات وهوية الفندق الحية</a></li>
       <li><a href="#" data-tab="tab-gallery"><span class="nav-icon">🖼️</span> إدارة معرض الصور</a></li>
       <li><a href="#" data-tab="tab-reviews"><span class="nav-icon">⭐</span> تقييمات وآراء النزلاء</a></li>
+      <li><a href="#" data-tab="tab-publish"><span class="nav-icon">🚀</span> النشر السحابي (GitHub)</a></li>
       <li><a href="#" data-tab="tab-backup"><span class="nav-icon">💾</span> النسخ الاحتياطي والاستعادة</a></li>
     </ul>
 
@@ -62,7 +97,9 @@
     </div>
   </aside>
 
-  <!-- Main Container -->
+  <!-- ==============================================
+       3. MAIN VIEW CONTAINER & TOPBAR
+       ============================================== -->
   <div class="admin-main">
     
     <!-- Topbar -->
@@ -73,13 +110,18 @@
       </div>
 
       <div class="topbar-right">
-        <div class="user-badge">
-          <div class="user-avatar">AD</div>
+        <!-- Live Clock -->
+        <div class="admin-clock" id="adminClock">--:--:--</div>
+
+        <!-- User Profile Pill -->
+        <div class="user-badge" style="background:rgba(255,255,255,0.04); border:1px solid var(--admin-border); padding:6px 14px; border-radius:25px; display:flex; align-items:center; gap:10px;">
+          <div class="user-avatar" id="topbarUserAvatar" style="width:34px; height:34px; border-radius:50%; background:var(--admin-gold); color:#07132c; display:flex; align-items:center; justify-content:center; font-weight:900;">👑</div>
           <div class="user-details">
-            <h5>إدارة روز عدن 1</h5>
-            <span>مدير النظام المعتمد</span>
+            <h5 id="topbarUserName" style="margin:0; font-size:0.85rem; color:#fff;">م. عمار الأسدي</h5>
+            <span id="topbarUserRole" style="font-size:0.72rem; color:var(--admin-gold-light);">مدير النظام العام</span>
           </div>
         </div>
+
         <button class="btn-admin btn-admin-danger" onclick="adminLogout()" title="تسجيل الخروج">🚪 خروج</button>
       </div>
     </header>
@@ -120,30 +162,40 @@
               <p>طلبات قيد المراجعة</p>
             </div>
           </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h4 id="statTotalUsers">3</h4>
+              <p>المستخدمون المصرحون</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Infrastructure status -->
+        <!-- Infrastructure Status Banner -->
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">حالة البنية التحتية والشبكة الفندقية</h3>
-            <span class="badge badge-success">يعمل بكفاءة 100%</span>
+            <div>
+              <h3 class="panel-title">حالة البنية التحتية والشبكة الفندقية</h3>
+              <div class="panel-subtitle">مراقبة منظومة الطاقة الهجينة وشبكة ستارلينك والألياف الضوئية</div>
+            </div>
+            <span class="badge badge-success">⚡ متصل ويعمل بكفاءة 100%</span>
           </div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:1rem;">
-            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:10px;">
-              <strong style="color:#c5a059;">⚡ التكييف والكهرباء:</strong>
-              <div style="color:#34d399; font-weight:800; margin-top:4px;">مستمر 24/7 (مولدات احتياطية)</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:1.2rem;">
+            <div style="background:rgba(255,255,255,0.03); padding:1.2rem; border-radius:12px; border:1px solid var(--admin-border-subtle);">
+              <strong style="color:#c5a059;">⚡ التكييف والكهرباء 24/7:</strong>
+              <div style="color:#34d399; font-weight:800; margin-top:4px;">مستمر دون انقطاع (مولدات احتياطية)</div>
             </div>
-            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:10px;">
+            <div style="background:rgba(255,255,255,0.03); padding:1.2rem; border-radius:12px; border:1px solid var(--admin-border-subtle);">
               <strong style="color:#c5a059;">🛰️ الإنترنت الفضائي (Starlink):</strong>
-              <div style="color:#34d399; font-weight:800; margin-top:4px;">متصل - زمن استجابة منخفض</div>
+              <div style="color:#34d399; font-weight:800; margin-top:4px;">متصل - سرعة فائقة وزمن استجابة منخفض</div>
             </div>
-            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:10px;">
-              <strong style="color:#c5a059;">🌐 الألياف الضوئية (Fiber):</strong>
-              <div style="color:#34d399; font-weight:800; margin-top:4px;">نشط فائق السرعة لجميع الطوابق</div>
+            <div style="background:rgba(255,255,255,0.03); padding:1.2rem; border-radius:12px; border:1px solid var(--admin-border-subtle);">
+              <strong style="color:#c5a059;">🌐 الألياف الضوئية (Fiber Optic):</strong>
+              <div style="color:#34d399; font-weight:800; margin-top:4px;">نشط وموزع لجميع الطوابق الـ 6</div>
             </div>
-            <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:10px;">
-              <strong style="color:#c5a059;">🛎️ السنترال والتحويلات:</strong>
-              <div style="color:#34d399; font-weight:800; margin-top:4px;">تحويلة 701 وتحويلة 444 متصلة</div>
+            <div style="background:rgba(255,255,255,0.03); padding:1.2rem; border-radius:12px; border:1px solid var(--admin-border-subtle);">
+              <strong style="color:#c5a059;">🛎️ السنترال والتحويلات الهاتفية:</strong>
+              <div style="color:#34d399; font-weight:800; margin-top:4px;">تحويلة 701 (طيرمانة) وتحويلة 444 (مطعم) نشطة</div>
             </div>
           </div>
         </div>
@@ -151,7 +203,8 @@
         <!-- Recent bookings table on dashboard -->
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">أحدث طلبات الحجز المستلمة من الموقع</h3>
+            <h3 class="panel-title">أحدث طلبات الحجز المستلمة من الموقع العام</h3>
+            <span style="color:#94a3b8; font-size:0.85rem;">يتم التحديث تلقائياً فور إرسال النزيل للطلب</span>
           </div>
           <div class="table-responsive">
             <table class="admin-table">
@@ -159,7 +212,7 @@
                 <tr>
                   <th>رقم الحجز</th>
                   <th>اسم الضيف</th>
-                  <th>الغرفة المطلوبة</th>
+                  <th>الوحدة المطلوبة</th>
                   <th>تاريخ الدخول</th>
                   <th>الحالة</th>
                 </tr>
@@ -173,12 +226,15 @@
       </div>
 
       <!-- ==============================================
-           TAB 2: ROOMS MANAGER
+           TAB 2: ROOMS MANAGER (CRUD + LOCAL IMAGE UPLOAD + COMBOBOXES)
            ============================================== -->
       <div class="tab-pane" id="tab-rooms">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">إدارة الغرف والأجنحة الفندقية</h3>
+            <div>
+              <h3 class="panel-title">إدارة الغرف والأجنحة الفندقية (72 وحدة)</h3>
+              <div class="panel-subtitle">إضافة وتعديل بيانات الغرف، رفع الصور مباشرة من جهازك، وتحديث الأسعار والمواصفات</div>
+            </div>
             <button class="btn-admin" onclick="openAddRoomModal()">➕ إضافة غرفة / جناح جديد</button>
           </div>
 
@@ -188,7 +244,7 @@
                 <tr>
                   <th>الصورة</th>
                   <th>اسم الغرفة / الجناح</th>
-                  <th>السعر (ريال يمني / سعودي)</th>
+                  <th>السعر (يمني / سعودي)</th>
                   <th>السعة</th>
                   <th>الدور</th>
                   <th>الحالة</th>
@@ -209,8 +265,10 @@
       <div class="tab-pane" id="tab-bookings">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">سجل حجوزات وطلبات النزلاء</h3>
-            <span style="color:#94a3b8; font-size:0.85rem;">يتم تسجيل الطلبات تلقائياً من الموقع وإتاحة الرد المباشر عبر واتساب</span>
+            <div>
+              <h3 class="panel-title">سجل حجوزات وطلبات النزلاء</h3>
+              <div class="panel-subtitle">إدارة الحجوزات الواردة والتواصل المباشر مع النزلاء عبر واتساب بنقرة زر</div>
+            </div>
           </div>
 
           <div class="table-responsive">
@@ -235,13 +293,209 @@
       </div>
 
       <!-- ==============================================
-           TAB 4: CONTENT & HOTEL SETTINGS
+           TAB 4: DESIGN & STYLING STUDIO (استوديو تخصيص التصميم)
+           ============================================== -->
+      <div class="tab-pane" id="tab-design">
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">استوديو تخصيص وتعديل تصميم الموقع</h3>
+              <div class="panel-subtitle">التحكم في الألوان الفندقية، الخطوط، استدارة الحواف، وإخفاء أو إظهار أقسام الموقع مباشرة</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-admin btn-admin-secondary" onclick="resetDesignStudioToDefault()">🔄 استعادة الافتراضي</button>
+            </div>
+          </div>
+
+          <form onsubmit="saveDesignStudioSettings(event)">
+            <div class="design-studio-grid">
+              
+              <!-- Color Palettes -->
+              <div>
+                <h4 style="color:#ffffff; margin-bottom:1rem; font-size:1.05rem;">🎨 لوحة الألوان الفندقية الرئيسية</h4>
+                
+                <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:1.5rem;">
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>اللون الذهبي الملكي (Gold Accent)</h5>
+                      <p>العناوين الرئيسية، الحدود الفاخرة والأزرار المميزة</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsPrimaryGold" onchange="updateDesignLivePreview()">
+                    </div>
+                  </div>
+
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>الذهبي الفاتح (Gold Light)</h5>
+                      <p>النصوص الفرعية والشارات الثانوية</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsGoldLight" onchange="updateDesignLivePreview()">
+                    </div>
+                  </div>
+
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>الأزرق المحيطي الفندقي (Ocean Blue)</h5>
+                      <p>أزرار المعاينة والروابط النشطة</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsOceanBlue" onchange="updateDesignLivePreview()">
+                    </div>
+                  </div>
+
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>خلفية الوضع الليلي (Dark Body Background)</h5>
+                      <p>اللون الأساسي لخلفية صفحات الموقع بالكامل</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsBgBodyDark">
+                    </div>
+                  </div>
+
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>خلفية البطاقات والحاويات (Card Background)</h5>
+                      <p>لون خلفية بطاقات الغرف والمميزات</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsBgCardDark">
+                    </div>
+                  </div>
+
+                  <div class="color-picker-card">
+                    <div class="color-picker-info">
+                      <h5>لون أزرار واتساب المعتمد</h5>
+                      <p>الأزرار العائمة وأزرار التواصل الفوري</p>
+                    </div>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="dsWhatsappGreen">
+                    </div>
+                  </div>
+                </div>
+
+                <h4 style="color:#ffffff; margin-bottom:1rem; font-size:1.05rem;">🔤 الخطوط واستدارة الحواف</h4>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>الخط العربي الأساسي:</label>
+                    <select id="dsFontFamily" class="admin-select" onchange="updateDesignLivePreview()">
+                      <option value="Tajawal">تجوال (Tajawal - الافتراضي الفاخر)</option>
+                      <option value="Cairo">القاهرة (Cairo - العصري البارز)</option>
+                      <option value="Almarai">المراعي (Almarai - هادئ وأنيق)</option>
+                      <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>استدارة حواف البطاقات والأزرار:</label>
+                    <select id="dsBorderRadius" class="admin-select" onchange="updateDesignLivePreview()">
+                      <option value="18px">عصري انسيابي (18px - الافتراضي)</option>
+                      <option value="26px">دائري فخم (26px)</option>
+                      <option value="12px">كلاسيكي متزن (12px)</option>
+                      <option value="6px">حاد أنيق (6px)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section Visibility Toggles & Live Preview Box -->
+              <div>
+                <h4 style="color:#ffffff; margin-bottom:1rem; font-size:1.05rem;">👁️ التحكم في إظهار وإخفاء أقسام الموقع</h4>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.8rem;">
+                  <div class="toggle-switch-card">
+                    <span>واجهة الهيرو والترحيب (Hero Banner)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleHero" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>شريط مؤشرات الفندق (72 غرفة، 6 طوابق، 24/7)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleMetrics" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>شريط التحويلات السريعة (701 و 444)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleExtensions" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم عن الفندق والريادة (About Section)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleAbout" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم الغرف والأجنحة الفاخرة (Rooms Section)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleRooms" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم طيرمانات ومجالس VIP (Tairmanah Section)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleVip" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم الخدمات والمرافق الشاملة (Services)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleAmenities" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم معرض الصور الفندقي (Gallery)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleGallery" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم تقييمات وآراء النزلاء (Reviews)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleReviews" checked><span class="slider"></span></label>
+                  </div>
+                  <div class="toggle-switch-card">
+                    <span>قسم الحجز السريع والموقع والخريطة (Contact)</span>
+                    <label class="switch"><input type="checkbox" id="secToggleContact" checked><span class="slider"></span></label>
+                  </div>
+                </div>
+
+                <!-- Live Preview Sample Card -->
+                <h4 style="color:#ffffff; margin-bottom:0.8rem; font-size:1.05rem;">🔍 معاينة حية للمظهر</h4>
+                <div id="dsPreviewSampleBox" style="background:#07132c; border:2px solid #c5a059; border-radius:18px; padding:1.4rem; text-align:right;">
+                  <span class="ds-preview-badge" style="display:inline-block; border:1px solid #c5a059; color:#dfbe7d; padding:2px 10px; border-radius:20px; font-size:0.75rem; font-weight:800; margin-bottom:8px;">معاينة حية للمظهر</span>
+                  <h4 style="color:#fff; margin:0 0 6px; font-size:1.1rem;">فندق روز عدن السياحي - الفرع الأول</h4>
+                  <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:12px;">هكذا ستظهر بطاقات الغرف والعناوين بالألوان والخطوط المختارة على الموقع العام.</p>
+                  <button type="button" class="ds-preview-btn" style="background:#c5a059; color:#07132c; border:none; padding:6px 16px; font-weight:800; border-radius:18px; cursor:pointer;">زر تجريبي</button>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="margin-top:2rem; text-align:left; border-top:1px solid rgba(255,255,255,0.08); padding-top:1.5rem;">
+              <button type="submit" class="btn-admin" style="padding:0.85rem 2.5rem; font-size:1rem;">
+                💾 تطبيق وحفظ تخصيصات التصميم على كامل الموقع
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           TAB 5: USER MANAGEMENT & SECURITY (إدارة المستخدمين والأمان)
+           ============================================== -->
+      <div class="tab-pane" id="tab-users">
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">إدارة المستخدمين والأمان وصلاحيات الدخول</h3>
+              <div class="panel-subtitle">إدارة حسابات المشرفين، تعديل الصلاحيات، وتعيين أو تغيير كلمات المرور</div>
+            </div>
+            <button class="btn-admin" onclick="openAddUserModal()">➕ إضافة مستخدم جديد</button>
+          </div>
+
+          <!-- Users List -->
+          <div id="adminUsersList">
+            <!-- Injected via admin.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           TAB 6: CONTENT & HOTEL SETTINGS
            ============================================== -->
       <div class="tab-pane" id="tab-content">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">تعديل بيانات وهوية الفندق الحية</h3>
-            <span style="color:#94a3b8; font-size:0.85rem;">التعديلات هنا تحفظ فوراً وتنعكس على كامل صفحات الموقع</span>
+            <div>
+              <h3 class="panel-title">تعديل بيانات وهوية الفندق الحية</h3>
+              <div class="panel-subtitle">التعديلات هنا تحفظ فوراً وتنعكس على كامل صفحات الموقع والمراسلات</div>
+            </div>
           </div>
 
           <form onsubmit="saveContentSettings(event)">
@@ -255,7 +509,7 @@
                 <input type="text" id="cfgNameEn" class="admin-input" required>
               </div>
               <div class="form-group">
-                <label>الهاتف الثابت المباشر:</label>
+                <label>الهاتف الثابت المباشر للاستقبال:</label>
                 <input type="text" id="cfgPhone" class="admin-input" required>
               </div>
               <div class="form-group">
@@ -263,23 +517,23 @@
                 <input type="text" id="cfgWhatsApp" class="admin-input" required>
               </div>
               <div class="form-group">
-                <label>البريد الإلكتروني للفندق:</label>
+                <label>البريد الإلكتروني الرسمي للفندق:</label>
                 <input type="email" id="cfgEmail" class="admin-input">
               </div>
               <div class="form-group">
-                <label>إجمالي عدد الغرف والأجنحة:</label>
+                <label>إجمالي عدد الغرف والأجنحة الفندقية:</label>
                 <input type="number" id="cfgRoomsCount" class="admin-input" value="72">
               </div>
               <div class="form-group">
-                <label>تحويلة استقبال الطيرمانات والمجلس:</label>
+                <label>تحويلة استقبال الطيرمانات والمجلس العام:</label>
                 <input type="text" id="cfgExt701" class="admin-input" value="701">
               </div>
               <div class="form-group">
-                <label>تحويلة خدمة الغرف والمطعم:</label>
+                <label>تحويلة خدمة الغرف والمطعم (24 ساعة):</label>
                 <input type="text" id="cfgExt444" class="admin-input" value="444">
               </div>
               <div class="form-group form-full">
-                <label>العنوان بالتفصيل (عربي):</label>
+                <label>العنوان التفصيلي للفندق:</label>
                 <input type="text" id="cfgAddressAr" class="admin-input" required>
               </div>
             </div>
@@ -294,13 +548,16 @@
       </div>
 
       <!-- ==============================================
-           TAB 5: GALLERY MANAGER
+           TAB 7: GALLERY MANAGER
            ============================================== -->
       <div class="tab-pane" id="tab-gallery">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">إدارة صور الفندق والمعرض</h3>
-            <button class="btn-admin" onclick="addGalleryItem()">➕ إضافة صورة جديدة</button>
+            <div>
+              <h3 class="panel-title">إدارة صور الفندق والمعرض التفاعلي</h3>
+              <div class="panel-subtitle">إضافة صور جديدة برفعها من جهازك أو الرابط، وتصنيف الصور وحذفها</div>
+            </div>
+            <button class="btn-admin" onclick="openAddGalleryModal()">➕ إضافة صورة جديدة</button>
           </div>
 
           <div id="adminGalleryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.2rem;">
@@ -310,12 +567,15 @@
       </div>
 
       <!-- ==============================================
-           TAB 6: REVIEWS MANAGER
+           TAB 8: REVIEWS MANAGER
            ============================================== -->
       <div class="tab-pane" id="tab-reviews">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">إدارة تقييمات وآراء النزلاء</h3>
+            <div>
+              <h3 class="panel-title">إدارة تقييمات وآراء النزلاء المعتمدة</h3>
+              <div class="panel-subtitle">مراجعة التقييمات المعروضة على الموقع وحذف أو تحديث الشهادات</div>
+            </div>
           </div>
 
           <div id="adminReviewsList">
@@ -325,19 +585,86 @@
       </div>
 
       <!-- ==============================================
-           TAB 7: BACKUP & RESTORE
+           TAB: GITHUB PAGES CLOUD PUBLISHER
+           ============================================== -->
+      <div class="tab-pane" id="tab-publish">
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">النشر والتحديث السحابي المباشر إلى GitHub Pages</h3>
+              <div class="panel-subtitle">إرسال التعديلات وبيانات الغرف والأسعار وحفظها فورياً في مستودع GitHub بنقرة زر</div>
+            </div>
+            <a href="https://pronetcomputer.github.io/RoseAdenHotel-1/" target="_blank" class="btn-admin btn-admin-secondary">
+              🌐 زيارة الموقع المنشور
+            </a>
+          </div>
+
+          <div style="background:rgba(30,96,196,0.12); border:1.5px solid rgba(56,182,255,0.35); border-radius:14px; padding:1.4rem; margin-bottom:1.8rem;">
+            <h4 style="color:#38bdf8; margin:0 0 6px;">💡 كيف يعمل نظام النشر السحابي المباشر؟</h4>
+            <p style="color:#cbd5e1; font-size:0.9rem; margin:0; line-height:1.7;">
+              يقوم هذا النظام بربط لوحة التحكم بمستودع المشروع على GitHub مباشرة عبر <strong>GitHub REST API</strong>. عند الضغط على زر النشر، يتم تجميع وتشفير كافة التعديلات في ملف <code>data.json</code> وعمل <code>Commit</code> آلي للمستودع، ليقوم GitHub Pages بنشر التحديثات لجميع زوار الموقع حول العالم فوراً.
+            </p>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>مسار مستودع GitHub (Owner/Repo):</label>
+              <input type="text" id="ghRepoInput" class="admin-input" value="pronetcomputer/RoseAdenHotel-1" placeholder="pronetcomputer/RoseAdenHotel-1" style="direction:ltr; text-align:right;">
+            </div>
+
+            <div class="form-group">
+              <label>الفرع المستهدف للنشر (Branch):</label>
+              <input type="text" id="ghBranchInput" class="admin-input" value="main" placeholder="main" style="direction:ltr; text-align:right;">
+            </div>
+
+            <div class="form-group form-full">
+              <label>رمز الوصول الشخصي (GitHub Personal Access Token - PAT):</label>
+              <div class="input-icon-group">
+                <span class="icon">🔑</span>
+                <input type="password" id="ghTokenInput" class="admin-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx (اختياري للنشر التلقائي عبر API)" style="direction:ltr; text-align:right;">
+              </div>
+              <small style="color:#94a3b8; font-size:0.78rem; display:block; margin-top:4px;">
+                * يمكنك استخراج الرمز من إعدادات GitHub (Settings ➔ Developer Settings ➔ Personal Access Tokens مع صلاحية repo). يتم حفظ الرمز بأمان في متصفحك فقط.
+              </small>
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem; display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="btn-admin" onclick="publishDataToGitHubPages()" style="padding:0.85rem 2.2rem; font-size:1rem;">
+              🚀 نشر وتحديث بيانات الموقع على GitHub Pages الآن
+            </button>
+            <button class="btn-admin btn-admin-secondary" onclick="exportDataAsJSON()">
+              📥 تنزيل data.json يدوياً
+            </button>
+            <a href="https://github.com/pronetcomputer/RoseAdenHotel-1" target="_blank" class="btn-admin btn-admin-secondary">
+              🐙 فتح مستودع GitHub
+            </a>
+          </div>
+
+          <!-- Live Publish Status Feedback Box -->
+          <div id="ghPublishStatusBox" style="display:none; margin-top:1.5rem; padding:1.2rem; border-radius:12px; background:rgba(255,255,255,0.04); border:1.5px solid var(--admin-border);">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ==============================================
+           TAB 9: BACKUP & RESTORE
            ============================================== -->
       <div class="tab-pane" id="tab-backup">
         <div class="admin-panel">
           <div class="panel-header">
-            <h3 class="panel-title">النسخ الاحتياطي واستعادة بيانات الموقع</h3>
+            <div>
+              <h3 class="panel-title">النسخ الاحتياطي واستعادة بيانات الموقع بالكامل</h3>
+              <div class="panel-subtitle">حفظ نسخة احتياطية آمنة بصيغة JSON تشمل الغرف والمستخدمين والحجوزات والتصميم</div>
+            </div>
           </div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
             <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(197,160,89,0.3); border-radius:14px; padding:1.8rem; text-align:center;">
               <div style="font-size:2.5rem; margin-bottom:10px;">💾</div>
               <h4 style="color:#ffffff; margin-bottom:8px;">تصدير نسخة احتياطية كاملة</h4>
-              <p style="color:#94a3b8; font-size:0.88rem; margin-bottom:1.4rem;">قم بتحميل ملف JSON يحتوي على كافة الغرف والحجوزات والإعدادات والتقييمات للرجوع إليها مستقبلاً.</p>
+              <p style="color:#94a3b8; font-size:0.88rem; margin-bottom:1.4rem;">قم بتحميل ملف JSON يحتوي على كافة الغرف والحجوزات وحسابات المستخدمين وإعدادات التصميم للرجوع إليها مستقبلاً.</p>
               <button class="btn-admin" onclick="exportDataAsJSON()">تنزيل ملف النسخة الاحتياطية (JSON)</button>
             </div>
 
@@ -361,85 +688,273 @@
     </main>
   </div>
 
-  <!-- Room Add/Edit Modal -->
-  <div id="roomEditModal" class="modal-overlay" style="display:none;">
-    <div class="modal-box" style="max-width:700px;">
-      <button class="modal-close" onclick="document.getElementById('roomEditModal').style.display='none'">&times;</button>
-      <h3 class="modal-title" id="roomModalTitle">تعديل بيانات الغرفة</h3>
-      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">قم بتعديل الحقول أدناه ثم اضغط حفظ لتطبيق التغييرات.</p>
+  <!-- ==============================================
+       MODALS
+       ============================================== -->
+
+  <!-- 1. Room Add/Edit Modal (with Local Image Upload & Comboboxes) -->
+  <div id="roomEditModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,9,21,0.85); z-index:2000; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(8px);">
+    <div class="modal-box" style="background:#0d1e3d; border:2px solid #c5a059; border-radius:18px; max-width:760px; width:100%; max-height:92vh; overflow-y:auto; padding:2.2rem; box-shadow:0 25px 60px rgba(0,0,0,0.8); position:relative;">
+      <button class="modal-close" onclick="document.getElementById('roomEditModal').style.display='none'" style="position:absolute; top:18px; left:18px; background:none; border:none; font-size:1.8rem; color:#94a3b8; cursor:pointer;">&times;</button>
+      <h3 class="modal-title" id="roomModalTitle" style="color:#ffffff; font-size:1.45rem; font-weight:900; margin-bottom:4px;">تعديل بيانات الغرفة</h3>
+      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">استخدم القوائم المنسدلة المحسنة وارفع الصورة مباشرة من جهازك</p>
 
       <form onsubmit="saveRoomForm(event)">
         <input type="hidden" id="roomFormId">
+
+        <!-- Local Image Upload Dropzone -->
+        <div class="form-group form-full">
+          <label>صورة الغرفة أو الجناح (رفع من الجهاز أو رابط مباشر):</label>
+          <div class="upload-dropzone" id="roomDropzone">
+            <div class="upload-icon">📷</div>
+            <div class="upload-prompt">انقر لاختيار صورة من جهازك، أو اسحب الصورة وأفلتها هنا</div>
+            <div class="upload-hint">يدعم صيغ JPG، PNG، WebP (الحجم الموصى به أقل من 4 ميجابايت)</div>
+            <input type="file" id="roomFileInput" accept="image/*" style="display:none;">
+          </div>
+          
+          <div class="upload-preview-box">
+            <img src="" id="roomPreviewImg" class="upload-preview-img" alt="معاينة الصورة">
+            <div class="upload-preview-details">
+              <strong style="color:#dfbe7d;">الصورة الحالية المختارة</strong>
+              <div style="font-size:0.75rem; color:#94a3b8;">سيتم تضمين هذه الصورة مباشرة في بيانات الغرفة وحفظها.</div>
+            </div>
+          </div>
+          <input type="hidden" id="rfImage" value="assets/room_twin.jpg">
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
-            <label>اسم الغرفة (عربي):</label>
-            <input type="text" id="rfNameAr" class="admin-input" required>
+            <label>اسم الغرفة (عربي): <span class="req">*</span></label>
+            <input type="text" id="rfNameAr" class="admin-input" required placeholder="مثال: جناح VIP الملكي الفاخر">
           </div>
           <div class="form-group">
             <label>اسم الغرفة (إنجليزي):</label>
-            <input type="text" id="rfNameEn" class="admin-input" required>
+            <input type="text" id="rfNameEn" class="admin-input" placeholder="e.g. VIP Royal Sea View Suite" style="direction:ltr; text-align:right;">
           </div>
+
+          <!-- Combobox: Room Type -->
           <div class="form-group">
-            <label>فئة الغرفة:</label>
-            <select id="rfType" class="admin-input">
-              <option value="vip">جناح VIP ملكي</option>
-              <option value="family">جناح عائلي فسيح</option>
-              <option value="double">غرفة مزدوجة فاخرة</option>
-              <option value="seaview">غرفة إطلالة بحرية مباشرة</option>
-              <option value="tairmanah">طيرمانة الدور السادس VIP</option>
+            <label>فئة ونوع الإقامة (كمبوبوكس):</label>
+            <select id="rfType" class="admin-select">
+              <!-- Injected dynamically -->
             </select>
           </div>
+
+          <!-- Combobox: Floor -->
           <div class="form-group">
-            <label>السعر بالريال اليمني (YER):</label>
-            <input type="number" id="rfPriceYER" class="admin-input" required>
+            <label>الدور / الطابق في الفندق (كمبوبوكس):</label>
+            <select id="rfFloorSelect" class="admin-select">
+              <!-- Injected dynamically -->
+            </select>
+          </div>
+
+          <!-- Currency Exchange Auto Calculator -->
+          <div class="form-group">
+            <label>السعر بالريال اليمني (YER): <span class="req">*</span></label>
+            <input type="number" id="rfPriceYER" class="admin-input" required placeholder="45000">
           </div>
           <div class="form-group">
-            <label>السعر بالريال السعودي (SAR):</label>
-            <input type="number" id="rfPriceSAR" class="admin-input" required>
+            <label>السعر بالريال السعودي (SAR) [حساب تلقائي]:</label>
+            <input type="number" id="rfPriceSAR" class="admin-input" required placeholder="300">
           </div>
+
+          <!-- Combobox: Capacity -->
           <div class="form-group">
-            <label>السعة المقدرة:</label>
-            <input type="text" id="rfCapacity" class="admin-input" placeholder="شخصين / عائلة">
+            <label>السعة المقدرة للنزلاء:</label>
+            <select id="rfCapacity" class="admin-select">
+              <option value="شخص واحد">شخص واحد</option>
+              <option value="شخصين" selected>شخصين (2)</option>
+              <option value="2 - 3 أشخاص">2 - 3 أشخاص</option>
+              <option value="4 - 6 أشخاص (عائلة)">4 - 6 أشخاص (عائلة)</option>
+              <option value="وفود وجلسات خاصة (حتى 15 شخصاً)">وفود وجلسات خاصة (حتى 15 شخصاً)</option>
+            </select>
           </div>
+
+          <!-- Combobox: Bed Options -->
           <div class="form-group">
-            <label>الدور / الطابق:</label>
-            <input type="text" id="rfFloor" class="admin-input" placeholder="الدور الثالث">
+            <label>نوع وتوزيع الأسرّة (كمبوبوكس):</label>
+            <select id="rfBedSelect" class="admin-select">
+              <!-- Injected dynamically -->
+            </select>
           </div>
-          <div class="form-group">
-            <label>نوع الأسرّة:</label>
-            <input type="text" id="rfBeds" class="admin-input" placeholder="سرير كينج ملكي">
-          </div>
+
+          <!-- Combobox: View Options -->
           <div class="form-group form-full">
-            <label>الإطلالة:</label>
-            <input type="text" id="rfView" class="admin-input" placeholder="إطلالة بحرية بانورامية">
+            <label>نوع الإطلالة البحرية (كمبوبوكس):</label>
+            <select id="rfViewSelect" class="admin-select">
+              <!-- Injected dynamically -->
+            </select>
           </div>
+
+          <!-- Amenities Checklist -->
           <div class="form-group form-full">
-            <label>المميزات والخدمات (مفصولة بفاصلة):</label>
-            <input type="text" id="rfAmenities" class="admin-input" placeholder="تكييف 24h، شاشة LED، ثلاجة، فايبر + ستارلينك">
+            <label>المميزات والخدمات المتوفرة في الغرفة (اختر بالنقر):</label>
+            <div id="rfAmenitiesChecklist" class="amenities-selector-grid">
+              <!-- Injected dynamically -->
+            </div>
           </div>
+
+          <!-- Room Status -->
           <div class="form-group form-full">
-            <label>مسار الصورة أو رابطها:</label>
-            <input type="text" id="rfImage" class="admin-input" placeholder="assets/room_twin.jpg">
-          </div>
-          <div class="form-group form-full">
-            <label>الحالة الحالية:</label>
-            <select id="rfStatus" class="admin-input">
-              <option value="متاحة">متاحة</option>
-              <option value="محجوزة">محجوزة</option>
-              <option value="صيانة">صيانة</option>
+            <label>الحالة التشغيلية للغرفة:</label>
+            <select id="rfStatus" class="admin-select">
+              <!-- Injected dynamically -->
             </select>
           </div>
         </div>
 
-        <div style="margin-top:1.5rem; text-align:left;">
-          <button type="submit" class="btn-admin" style="padding:0.75rem 2rem;">💾 حفظ البيانات</button>
+        <div style="margin-top:1.8rem; text-align:left; border-top:1px solid rgba(255,255,255,0.08); padding-top:1.2rem;">
+          <button type="submit" class="btn-admin" style="padding:0.8rem 2.5rem; font-size:1rem;">💾 حفظ وتأكيد بيانات الغرفة</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- 2. User Add/Edit Modal (إدارة المستخدمين) -->
+  <div id="userEditModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,9,21,0.85); z-index:2000; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(8px);">
+    <div class="modal-box" style="background:#0d1e3d; border:2px solid #c5a059; border-radius:18px; max-width:620px; width:100%; max-height:90vh; overflow-y:auto; padding:2.2rem; box-shadow:0 25px 60px rgba(0,0,0,0.8); position:relative;">
+      <button class="modal-close" onclick="document.getElementById('userEditModal').style.display='none'" style="position:absolute; top:18px; left:18px; background:none; border:none; font-size:1.8rem; color:#94a3b8; cursor:pointer;">&times;</button>
+      <h3 class="modal-title" id="userModalTitle" style="color:#ffffff; font-size:1.45rem; font-weight:900; margin-bottom:4px;">إضافة مستخدم جديد</h3>
+      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">تحديد بيانات الحساب والصلاحيات الفندقية</p>
+
+      <form onsubmit="saveUserForm(event)">
+        <input type="hidden" id="userFormId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم المستخدم للدخول (Username): <span class="req">*</span></label>
+            <input type="text" id="ufUsername" class="admin-input" required placeholder="مثال: ammar_manager" style="direction:ltr; text-align:right;">
+          </div>
+          <div class="form-group">
+            <label>الاسم الكامل للمستخدم: <span class="req">*</span></label>
+            <input type="text" id="ufFullName" class="admin-input" required placeholder="مثال: م. عمار الأسدي">
+          </div>
+          <div class="form-group">
+            <label>البريد الإلكتروني:</label>
+            <input type="email" id="ufEmail" class="admin-input" placeholder="user@roseadenhotel.com" style="direction:ltr; text-align:right;">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف / الواتساب:</label>
+            <input type="text" id="ufPhone" class="admin-input" placeholder="775043020" style="direction:ltr; text-align:right;">
+          </div>
+          <div class="form-group">
+            <label>الدور والصلاحية (Role):</label>
+            <select id="ufRole" class="admin-select">
+              <option value="super_admin">مدير النظام العام (Super Admin - صلاحيات كاملة)</option>
+              <option value="hotel_manager">مدير الفندق (Hotel Manager - إدارة الغرف والحجوزات)</option>
+              <option value="receptionist" selected>موظف استقبال (Receptionist - حجوزات واستعلام)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>حالة الحساب:</label>
+            <select id="ufStatus" class="admin-select">
+              <option value="active">نشط ومصرح له بالدخول</option>
+              <option value="inactive">معطل مؤقتاً</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>الأيقونة التعبيرية (Avatar):</label>
+            <select id="ufAvatar" class="admin-select">
+              <option value="👑">👑 مدير عام (تاج)</option>
+              <option value="🏨">🏨 مدير فندق</option>
+              <option value="🛎️">🛎️ موظف استقبال</option>
+              <option value="💼">💼 إداري</option>
+              <option value="👤">👤 مستخدم عادي</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور (اتركها فارغة عند التعديل إذا لم ترغب بتغييرها):</label>
+            <input type="password" id="ufPassword" class="admin-input" placeholder="كلمة المرور">
+          </div>
+        </div>
+
+        <div style="margin-top:1.8rem; text-align:left; border-top:1px solid rgba(255,255,255,0.08); padding-top:1.2rem;">
+          <button type="submit" class="btn-admin" style="padding:0.8rem 2.5rem; font-size:1rem;">💾 حفظ حساب المستخدم</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Change Password Modal (تغيير كلمة المرور) -->
+  <div id="changePasswordModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,9,21,0.85); z-index:2000; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(8px);">
+    <div class="modal-box" style="background:#0d1e3d; border:2px solid #c5a059; border-radius:18px; max-width:480px; width:100%; padding:2.2rem; box-shadow:0 25px 60px rgba(0,0,0,0.8); position:relative;">
+      <button class="modal-close" onclick="document.getElementById('changePasswordModal').style.display='none'" style="position:absolute; top:18px; left:18px; background:none; border:none; font-size:1.8rem; color:#94a3b8; cursor:pointer;">&times;</button>
+      <h3 class="modal-title" style="color:#ffffff; font-size:1.35rem; font-weight:900; margin-bottom:4px;">تغيير كلمة المرور</h3>
+      <p style="color:#dfbe7d; font-size:0.88rem; margin-bottom:1.5rem;" id="cpUserNameTitle">للمستخدم: --</p>
+
+      <form onsubmit="saveChangePasswordForm(event)">
+        <div class="form-group">
+          <label>كلمة المرور الجديدة: <span class="req">*</span></label>
+          <input type="password" id="cpNewPassword" class="admin-input" required placeholder="أدخل كلمة المرور الجديدة">
+        </div>
+        <div class="form-group">
+          <label>تأكيد كلمة المرور الجديدة: <span class="req">*</span></label>
+          <input type="password" id="cpConfirmPassword" class="admin-input" required placeholder="أعد إدخال كلمة المرور">
+        </div>
+
+        <div style="margin-top:1.6rem; text-align:left;">
+          <button type="submit" class="btn-admin" style="width:100%; justify-content:center; padding:0.8rem;">
+            🔒 تحديث كلمة المرور الآن
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Gallery Add Photo Modal (with Local Image Upload) -->
+  <div id="galleryUploadModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(4,9,21,0.85); z-index:2000; align-items:center; justify-content:center; padding:1.5rem; backdrop-filter:blur(8px);">
+    <div class="modal-box" style="background:#0d1e3d; border:2px solid #c5a059; border-radius:18px; max-width:580px; width:100%; padding:2.2rem; box-shadow:0 25px 60px rgba(0,0,0,0.8); position:relative;">
+      <button class="modal-close" onclick="document.getElementById('galleryUploadModal').style.display='none'" style="position:absolute; top:18px; left:18px; background:none; border:none; font-size:1.8rem; color:#94a3b8; cursor:pointer;">&times;</button>
+      <h3 class="modal-title" style="color:#ffffff; font-size:1.35rem; font-weight:900; margin-bottom:4px;">إضافة صورة لمعرض الفندق</h3>
+      <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1.5rem;">يمكنك رفع الصورة مباشرة من جهازك أو وضع مسارها</p>
+
+      <form onsubmit="saveGalleryUploadForm(event)">
+        <div class="form-group">
+          <label>عنوان ووصف الصورة:</label>
+          <input type="text" id="galleryTitleInput" class="admin-input" required placeholder="مثال: إطلالة شاطئ أبين في الغروب">
+        </div>
+
+        <div class="form-group">
+          <label>فئة وتصنيف الصورة:</label>
+          <select id="galleryCategoryInput" class="admin-select">
+            <option value="building">المبنى الخارجي والواجهة</option>
+            <option value="lobby">الاستقبال واللوبي</option>
+            <option value="rooms">الغرف والأجنحة الفندقية</option>
+            <option value="tairmanah">طيرمانات ومجالس VIP</option>
+            <option value="views">الإطلالات البحرية والكورنيش</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>صورة المعرض (رفع من الجهاز):</label>
+          <div class="upload-dropzone" id="galleryDropzone">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-prompt">انقر لاختيار صورة من جهازك، أو اسحبها هنا</div>
+            <input type="file" id="galleryFileInput" accept="image/*" style="display:none;">
+          </div>
+          
+          <div class="upload-preview-box">
+            <img src="" id="galleryPreviewImg" class="upload-preview-img" alt="معاينة الصورة">
+            <div class="upload-preview-details">
+              <strong style="color:#dfbe7d;">معاينة الصورة المحملة</strong>
+            </div>
+          </div>
+          <input type="hidden" id="galleryImgInput" value="assets/building.jpg">
+        </div>
+
+        <div style="margin-top:1.6rem; text-align:left;">
+          <button type="submit" class="btn-admin" style="width:100%; justify-content:center; padding:0.8rem;">
+            ➕ إضافة الصورة إلى المعرض
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="adminToast" class="admin-toast"></div>
+
+  <!-- JavaScript Engines -->
   <script src="js/data.js"></script>
   <script src="js/admin.js"></script>
-  <div id="adminToast" class="admin-toast"></div>
 </body>
 </html>
